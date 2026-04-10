@@ -127,21 +127,14 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     if (!session || !session.active) return;
 
     const elapsedMs = now() - session.startTs;
-    const TWENTY_MIN_MS = 20 * 60 * 1000;
 
-    if (elapsedMs >= TWENTY_MIN_MS && !session.durationIntervened && session.tabId != null) {
-      // Ask the content script to show the smart intervention modal.
+    if (!session.durationIntervened && session.tabId != null) {
+      // Send elapsed time every minute; content script decides when to intervene
+      // based on the session's own maxTimeMs setting.
       try {
         await chrome.tabs.sendMessage(session.tabId, {
           type: "PN_DURATION_THRESHOLD",
           payload: { elapsedMs }
-        });
-        await setLocal({
-          [STORAGE_KEYS.session]: {
-            ...session,
-            durationIntervened: true,
-            lastInterventionTs: now()
-          }
         });
       } catch {
         // Tab might be gone; ignore.

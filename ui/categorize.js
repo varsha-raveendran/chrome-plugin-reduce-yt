@@ -19,7 +19,7 @@ function pnScoreTitle(t, rules) {
 
 function pnCategorizeTitle(title) {
   const t = pnNormalizeTitle(title);
-  if (!t) return "entertainment?";
+  if (!t) return "Entertainment";
 
   // Title-only heuristics: score-based so it works without exact category words.
   // These are intentionally broad, but weighted to reduce false positives.
@@ -83,7 +83,7 @@ function pnFunMessage(category, fmtDuration, ms) {
       return `Wholesome. ${time} on hobbies—future you will approve.`;
     case "travel":
       return `Mentally abroad for ${time}. Passport: imaginary (for now).`;
-    case "entertainment?":
+    case "Entertainment":
     default:
       return `WTH! You spent ${time} on this!`;
   }

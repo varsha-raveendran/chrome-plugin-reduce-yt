@@ -31,6 +31,10 @@
     sub.textContent = "";
     sub.setAttribute("data-pn-sub", "1");
 
+    const match = document.createElement("div");
+    match.className = "pn-friction-match";
+    match.setAttribute("data-pn-match", "1");
+
     const progress = document.createElement("div");
     progress.className = "pn-progress";
     const bar = document.createElement("div");
@@ -54,6 +58,7 @@
 
     card.appendChild(title);
     card.appendChild(sub);
+    card.appendChild(match);
     card.appendChild(progress);
     card.appendChild(actions);
 
@@ -108,11 +113,59 @@
     return Boolean(wl);
   }
 
+  const SKIP_NUDGE_COUNT = 5;
+  const SKIP_NUDGE_MSG = "That's 5 skips — are you still on track with your intent?";
+
+  function intentMatchMessage(intent, videoTitle, allowedTopics) {
+    if (!videoTitle) return null;
+
+    const normalizedTitle = videoTitle.toLowerCase().replace(/[^a-z0-9\s]/g, " ");
+
+    // If allowed topics are set, use them as the primary signal.
+    if (Array.isArray(allowedTopics) && allowedTopics.length > 0) {
+      const matched = allowedTopics.find((topic) => normalizedTitle.includes(topic));
+      if (matched) {
+        return { match: true,  text: `On track — matches allowed topic "${matched}" 👏` };
+      } else {
+        return { match: false, text: `Not in your allowed topics 😢` };
+      }
+    }
+
+    // Fall back to intent keyword overlap.
+    if (!intent) return null;
+
+    const STOPWORDS = new Set([
+      "the", "and", "for", "with", "this", "that", "from", "have", "just",
+      "are", "was", "were", "will", "what", "how", "why", "when", "who",
+      "video", "youtube", "watch"
+    ]);
+    const tokenize = (str) =>
+      str.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter((w) => w.length >= 3 && !STOPWORDS.has(w));
+
+    const intentTokens = new Set(tokenize(intent));
+    const titleTokens = tokenize(videoTitle);
+
+    if (intentTokens.size === 0) return null;
+
+    const matches = titleTokens.filter((w) => intentTokens.has(w)).length;
+    const score = matches / intentTokens.size;
+
+    if (score >= 0.4) {
+      return { match: true,  text: "Looks on track with your intent 👏" };
+    } else {
+      return { match: false, text: "Doesn't seem related to your intent 😢" };
+    }
+  }
+
   class FrictionController {
     constructor() {
       this._open = false;
       this._timer = null;
       this._raf = null;
+      this._skipCount = 0;
     }
 
     async init() {
@@ -169,7 +222,29 @@
 
       this._open = true;
       el.setAttribute("data-open", "true");
+
+      const titleEl = el.querySelector(".pn-friction-title");
+      if (titleEl) {
+        titleEl.textContent = this._skipCount >= SKIP_NUDGE_COUNT
+          ? SKIP_NUDGE_MSG
+          : "Still want to watch?";
+      }
       sub.textContent = `Up next: ${title}`;
+
+      const matchEl = el.querySelector('[data-pn-match="1"]');
+      if (matchEl) {
+        const intent = window.PN_Session?.instance?.getIntent() || "";
+        const allowedTopics = window.PN_Session?.instance?.getAllowedTopics() || [];
+        const result = intentMatchMessage(intent, title, allowedTopics);
+        if (result) {
+          matchEl.textContent = result.text;
+          matchEl.setAttribute("data-match", result.match ? "yes" : "no");
+          matchEl.style.display = "";
+        } else {
+          matchEl.textContent = "";
+          matchEl.style.display = "none";
+        }
+      }
 
       const started = Date.now();
       const DURATION_MS = 3000;
@@ -186,6 +261,7 @@
       };
 
       const go = () => {
+        this._skipCount++;
         cleanup();
         location.assign(url);
       };

@@ -73,6 +73,12 @@
   outline: none;
 }
 
+.pn-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pn-muted);
+}
+
 .pn-input:focus {
   border-color: rgba(110, 168, 254, 0.9);
   box-shadow: 0 0 0 3px rgba(110, 168, 254, 0.18);
@@ -140,27 +146,45 @@
   left: 50%;
   top: 14vh;
   transform: translateX(-50%);
-  width: min(520px, calc(100vw - 32px));
+  width: min(640px, calc(100vw - 32px));
   background: var(--pn-surface);
   color: var(--pn-text);
   border: 1px solid var(--pn-border);
   border-radius: var(--pn-radius);
   box-shadow: var(--pn-shadow);
   font-family: var(--pn-font);
-  padding: 16px 16px 14px;
+  padding: 24px 24px 20px;
 }
 
 .pn-friction-title {
-  margin: 0 0 6px;
-  font-size: 14px;
+  margin: 0 0 8px;
+  font-size: 18px;
   font-weight: 700;
 }
 
 .pn-friction-sub {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   color: var(--pn-muted);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.35;
+}
+
+.pn-friction-match {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  padding: 5px 10px;
+  border-radius: 8px;
+}
+
+.pn-friction-match[data-match="yes"] {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.1);
+}
+
+.pn-friction-match[data-match="no"] {
+  color: #fb923c;
+  background: rgba(251, 146, 60, 0.1);
 }
 
 .pn-progress {

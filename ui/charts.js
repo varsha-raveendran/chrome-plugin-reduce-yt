@@ -42,7 +42,7 @@ function effectiveCategory(overrides, video) {
   const vid = video?.videoId;
   const override = vid && overrides?.[vid];
   if (typeof override === "string" && override) return override;
-  return window.PN_Categorize.categorizeTitle(video?.title || "");
+  return window.PN_Categorize.categorizeTitle(video?.title || "").replace("?", "");
 }
 
 // ── data loading ───────────────────────────────────────────────────────────────
@@ -74,9 +74,9 @@ function setupCanvas(canvas) {
  * datasets: array of { data: number[], color: string|string[] }
  *   - If color is a string, all bars in that dataset share the same color.
  *   - If color is an array, each bar gets its own color.
- *   - Single-dataset shorthand: pass datasets=[{data, colors:[...per-bar]}]
+ *   - Per-bar colors: pass barColors:[...] as a top-level option alongside datasets
  */
-function drawBarChart(canvas, { labels, datasets }) {
+function drawBarChart(canvas, { labels, datasets, barColors }) {
   const { ctx, w, h } = setupCanvas(canvas);
 
   const padL = 54, padR = 16, padT = 14, padB = 36;
@@ -117,8 +117,8 @@ function drawBarChart(canvas, { labels, datasets }) {
       const x      = groupX + di * (barW + barGap);
       const y      = padT + plotH - barH;
       const r      = Math.min(4, barW / 2);
-      // Per-bar color or dataset color
-      const barColor = Array.isArray(ds.colors) ? (ds.colors[i] || BAR_DEFAULT)
+      // Per-bar color (top-level barColors), dataset color, or default
+      const barColor = Array.isArray(barColors) ? (barColors[i] || BAR_DEFAULT)
                       : (ds.color || BAR_DEFAULT);
       ctx.fillStyle = barColor;
       roundedRect(ctx, x, y, barW, barH, r);
@@ -382,7 +382,8 @@ function renderCategoryChart(history, overrides) {
 
   drawBarChart(canvas, {
     labels,
-    datasets: [{ data: values, colors }]
+    datasets: [{ data: values }],
+    barColors: colors
   });
 
   // Legend
@@ -415,7 +416,7 @@ function renderTimeOfDayChart(history) {
     return "#475569";                          // night
   });
 
-  drawBarChart(canvas, { labels, datasets: [{ data: counts, colors }] });
+  drawBarChart(canvas, { labels, datasets: [{ data: counts }], barColors: colors });
 }
 
 function renderPeriodChart(history, period) {

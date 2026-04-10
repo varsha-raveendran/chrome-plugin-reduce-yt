@@ -59,7 +59,7 @@
   }
 
   function isTabActiveForTiming() {
-    return document.visibilityState === "visible" && document.hasFocus();
+    return document.visibilityState === "visible";
   }
 
   async function activityPing() {
@@ -132,6 +132,17 @@
           this._onDurationThreshold(msg.payload?.elapsedMs || 0);
         }
       });
+
+      // Expose instance so other content scripts (e.g. friction.js) can read session state.
+      window.PN_Session.instance = this;
+    }
+
+    getIntent() {
+      return this._session?.intent || "";
+    }
+
+    getAllowedTopics() {
+      return this._session?.allowedTopics || [];
     }
 
     async _loadSession() {
@@ -256,12 +267,14 @@
       }
     }
 
-    async _startSession(intent) {
+    async _startSession(intent, { maxTimeMs, allowedTopics } = {}) {
       const startTs = now();
       this._session = {
         active: true,
         startTs,
         intent,
+        maxTimeMs: maxTimeMs || 20 * 60 * 1000,
+        allowedTopics: allowedTopics || [],
         lastInterventionTs: 0
       };
       await window.PN_Storage.setSession(this._session);
@@ -347,21 +360,60 @@
       if (!this._ensureNoDuplicateModal()) return;
 
       const wrapper = document.createElement("div");
+      wrapper.style.cssText = "display:flex;flex-direction:column;gap:10px";
 
       const input = document.createElement("input");
       input.className = "pn-input";
       input.type = "text";
       input.setAttribute("autocomplete", "off");
       input.setAttribute("spellcheck", "true");
-      input.setAttribute("placeholder", "E.g. upload a video, watch a specific tutorial, reply to a comment…");
+      input.setAttribute("placeholder", "E.g. watch a specific tutorial, reply to a comment…");
       input.setAttribute("aria-label", "Session intent");
       wrapper.appendChild(input);
+
+      // Max time field
+      const timeRow = document.createElement("div");
+      timeRow.style.cssText = "display:flex;flex-direction:column;gap:4px";
+      const timeLabel = document.createElement("label");
+      timeLabel.className = "pn-field-label";
+      timeLabel.textContent = "Max time (minutes)";
+      const timeInput = document.createElement("input");
+      timeInput.className = "pn-input";
+      timeInput.type = "number";
+      timeInput.min = "1";
+      timeInput.max = "480";
+      timeInput.value = "20";
+      timeInput.setAttribute("aria-label", "Max session time in minutes");
+      timeRow.appendChild(timeLabel);
+      timeRow.appendChild(timeInput);
+      wrapper.appendChild(timeRow);
+
+      // Allowed topics field
+      const topicsRow = document.createElement("div");
+      topicsRow.style.cssText = "display:flex;flex-direction:column;gap:4px";
+      const topicsLabel = document.createElement("label");
+      topicsLabel.className = "pn-field-label";
+      topicsLabel.textContent = "Allowed topics (comma-separated keywords, optional)";
+      const topicsInput = document.createElement("input");
+      topicsInput.className = "pn-input";
+      topicsInput.type = "text";
+      topicsInput.setAttribute("autocomplete", "off");
+      topicsInput.setAttribute("placeholder", "E.g. react, typescript, cooking");
+      topicsInput.setAttribute("aria-label", "Allowed topics");
+      topicsRow.appendChild(topicsLabel);
+      topicsRow.appendChild(topicsInput);
+      wrapper.appendChild(topicsRow);
 
       const startBtn = window.PN_UI.button("Start Session", {
         variant: "primary",
         onClick: async () => {
           const intent = (input.value || "").trim();
-          await this._startSession(intent);
+          const maxTimeMs = Math.max(1, parseInt(timeInput.value, 10) || 20) * 60 * 1000;
+          const allowedTopics = (topicsInput.value || "")
+            .split(",")
+            .map((t) => t.trim().toLowerCase())
+            .filter(Boolean);
+          await this._startSession(intent, { maxTimeMs, allowedTopics });
           this._closeModal();
         }
       });
@@ -456,7 +508,9 @@
     }
 
     async _onDurationThreshold(elapsedMs) {
-      // Background worker sends this at 20m. Respect cooldown if user just continued.
+      // Background worker sends this every minute. Check against session's own maxTimeMs.
+      const maxTimeMs = this._session?.maxTimeMs || 20 * 60 * 1000;
+      if ((elapsedMs || 0) < maxTimeMs) return;
       const last = this._session?.lastInterventionTs || 0;
       if (last && now() - last < this._interventionCooldownMs) return;
       await this._showInterventionModal({ trigger: "duration" });
@@ -499,13 +553,14 @@
     _startCurrentVideoTiming({ url, videoId }) {
       const title = getStableVideoTitle();
       const t = now();
+      const priorWatchMs = this._stats.videos?.[videoId]?.watchMs || 0;
       this._currentVideo = {
         videoId,
         url,
         title,
         startedTs: t,
         lastTickTs: t,
-        watchMs: 0
+        watchMs: priorWatchMs
       };
 
       this._stats.videos = this._stats.videos || {};

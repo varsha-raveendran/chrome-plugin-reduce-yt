@@ -45,7 +45,7 @@ function getOverrideForVideoId(overrides, videoId) {
 function effectiveCategory(overrides, video) {
   const override = getOverrideForVideoId(overrides, video?.videoId);
   if (override) return override;
-  return window.PN_Categorize.categorizeTitle(video?.title || "");
+  return window.PN_Categorize.categorizeTitle(video?.title || "").replace("?", "");
 }
 
 async function setCategoryOverride(videoId, categoryOrNull) {
@@ -129,7 +129,7 @@ function renderVideosFromVideoArray(vids) {
     pill.className = "pill";
     pill.textContent = fmtDuration(v.watchMs || 0);
 
-    const inferred = window.PN_Categorize.categorizeTitle(v.title || "");
+    const inferred = window.PN_Categorize.categorizeTitle(v.title || "").replace("?", "");
     const override = getOverrideForVideoId(window.__pn_overrides, v.videoId);
     const value = override || inferred;
 
@@ -265,10 +265,8 @@ async function render() {
   const view = window.__pn_view;
 
   const backBtn = $("backToCurrent");
-  if (view.mode === "history") {
-    backBtn.style.display = "inline-block";
-  } else {
-    backBtn.style.display = "none";
+  if (backBtn) {
+    backBtn.style.display = view.mode === "history" ? "inline-block" : "none";
   }
 
   if (view.mode === "history") {
@@ -297,6 +295,11 @@ async function render() {
   $("active").textContent = active ? fmtDuration(stats?.totalActiveMs || 0) : "—";
   $("videosOpened").textContent = active ? String(stats?.videosWatched || 0) : "—";
   $("uniqueVideos").textContent = active ? String(Object.keys(stats?.videos || {}).length) : "—";
+
+  const endBtn = $("endSession");
+  if (endBtn) {
+    endBtn.disabled = !active;
+  }
 
   renderVideosFromStats(stats);
   renderHistory(history);

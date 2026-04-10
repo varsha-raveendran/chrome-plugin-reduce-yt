@@ -132,6 +132,12 @@ body {
   border-color: rgba(110, 168, 254, 0.9);
 }
 
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .btn.danger {
   background: rgba(255, 107, 107, 0.18);
   border-color: rgba(255, 107, 107, 0.55);
@@ -181,7 +187,7 @@ body {
 }
 
 .catSelect {
-  appearance: none;
+  appearance: auto;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.06);
   color: var(--text);
@@ -189,6 +195,7 @@ body {
   border-radius: 999px;
   font-size: 11px;
   font-weight: 800;
+  cursor: pointer;
 }
 
 .catSelect:focus {
