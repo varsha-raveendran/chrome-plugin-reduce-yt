@@ -9,17 +9,51 @@
     <style>
       body { width: auto; }
       .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 24px; }
+
+      .tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 12px;
+      }
+
+      .tab {
+        appearance: none;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        padding: 7px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 12px;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .tab.active {
+        background: rgba(110, 168, 254, 0.15);
+        border-color: rgba(110, 168, 254, 0.55);
+        color: var(--text);
+      }
+
+      .tab:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+      }
     </style>
   </head>
   <body>
     <main class="wrap" aria-label="YouTube Intent Analytics">
       <header class="top">
         <div class="title">Analytics</div>
-        <div class="row" style="gap:8px">
-          <button id="backBtn" class="btn">← Back</button>
-          <div class="muted" id="status">Loading…</div>
-        </div>
+        <div class="muted" id="status">Loading…</div>
       </header>
+
+      <nav class="tabs" aria-label="Page tabs">
+        <a class="tab" href="./app.html">Session</a>
+        <span class="tab active">Analytics</span>
+        <a class="tab" href="./notes.html">Notes</a>
+      </nav>
 
       <!-- Period selector -->
       <section class="card">

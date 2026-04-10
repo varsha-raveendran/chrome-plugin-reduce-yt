@@ -1,0 +1,285 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube Intent — Notes</title>
+    <link rel="stylesheet" href="./analytics.css" />
+    <style>
+      body { width: auto; }
+      .wrap { max-width: 980px; margin: 0 auto; }
+
+      .tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 12px;
+      }
+
+      .tab {
+        appearance: none;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        padding: 7px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 12px;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .tab.active {
+        background: rgba(110, 168, 254, 0.15);
+        border-color: rgba(110, 168, 254, 0.55);
+        color: var(--text);
+      }
+
+      .tab:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+      }
+
+      .filterRow {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+
+      .filterInput {
+        flex: 1;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-family: var(--font);
+        outline: none;
+      }
+
+      .filterInput:focus {
+        border-color: rgba(110, 168, 254, 0.9);
+        box-shadow: 0 0 0 3px rgba(110, 168, 254, 0.18);
+      }
+
+      .noteCard {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 12px 14px;
+        margin-bottom: 10px;
+      }
+
+      .noteCardTop {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .noteCardTitle {
+        font-size: 13px;
+        font-weight: 800;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 620px;
+      }
+
+      .noteCardTitle a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      .noteCardTitle a:hover {
+        text-decoration: underline;
+      }
+
+      .noteCardMeta {
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 8px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .noteCardText {
+        font-size: 13px;
+        line-height: 1.55;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 10px;
+      }
+
+      .deleteBtn {
+        appearance: none;
+        background: none;
+        border: 1px solid transparent;
+        color: var(--muted);
+        font-size: 12px;
+        cursor: pointer;
+        padding: 3px 7px;
+        border-radius: 8px;
+        flex-shrink: 0;
+      }
+
+      .deleteBtn:hover {
+        border-color: rgba(255, 107, 107, 0.55);
+        background: rgba(255, 107, 107, 0.1);
+        color: var(--danger);
+      }
+
+      #emptyNotes {
+        text-align: center;
+        padding: 32px 0;
+      }
+
+      .noteCount {
+        font-size: 12px;
+        color: var(--muted);
+        margin-left: auto;
+      }
+
+      .catFilters {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+
+      .catBtn {
+        appearance: none;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        padding: 5px 12px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: var(--font);
+      }
+
+      .catBtn.active {
+        background: rgba(110, 168, 254, 0.15);
+        border-color: rgba(110, 168, 254, 0.55);
+        color: var(--text);
+      }
+
+      .catBtn:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+      }
+
+      .catPill {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        margin-left: 6px;
+        vertical-align: middle;
+        text-transform: capitalize;
+      }
+
+      .entriesWrap {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .entryRow {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .entryView {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .entryText {
+        font-size: 13px;
+        line-height: 1.55;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .entryMeta {
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .entryActions {
+        display: flex;
+        gap: 5px;
+        margin-top: 4px;
+      }
+
+      .entryEditView {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap" aria-label="YouTube Intent Notes">
+      <header class="top">
+        <div class="title">YouTube Intent</div>
+        <div class="muted" id="status">Notes</div>
+      </header>
+
+      <nav class="tabs" aria-label="Page tabs">
+        <a class="tab" id="tabSession" href="./app.html">Session</a>
+        <a class="tab" id="tabCharts" href="./charts.html">Analytics</a>
+        <span class="tab active">Notes</span>
+      </nav>
+
+      <section class="card">
+        <div class="filterRow">
+          <input
+            type="search"
+            id="filterInput"
+            class="filterInput"
+            placeholder="Filter by video title, intent, or note text…"
+            aria-label="Filter notes"
+          />
+          <span class="noteCount" id="noteCount"></span>
+          <button id="clearAllNotes" class="btn danger">Clear all</button>
+        </div>
+
+        <div class="catFilters" role="group" aria-label="Filter by category">
+          <button class="catBtn active" data-cat="">All</button>
+          <button class="catBtn" data-cat="technical">Technical</button>
+          <button class="catBtn" data-cat="hobby">Hobby</button>
+          <button class="catBtn" data-cat="travel">Travel</button>
+          <button class="catBtn" data-cat="entertainment">Entertainment</button>
+        </div>
+
+        <div id="notesList" aria-label="Notes list"></div>
+        <div id="emptyNotes" class="muted small" style="display:none">
+          No notes yet. Open a YouTube video and click <strong>📝 Notes</strong> to add one.
+        </div>
+      </section>
+    </main>
+
+    <script src="./categorize.js"></script>
+    <script src="./notes.js"></script>
+  </body>
+</html>

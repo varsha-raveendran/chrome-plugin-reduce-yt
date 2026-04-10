@@ -129,12 +129,14 @@ function renderVideosFromVideoArray(vids) {
     pill.className = "pill";
     pill.textContent = fmtDuration(v.watchMs || 0);
 
-    const sel = document.createElement("select");
-    sel.className = "catSelect";
-    sel.setAttribute("aria-label", "Category");
     const inferred = window.PN_Categorize.categorizeTitle(v.title || "");
     const override = getOverrideForVideoId(window.__pn_overrides, v.videoId);
     const value = override || inferred;
+
+    const sel = document.createElement("select");
+    sel.className = "catSelect";
+    sel.setAttribute("aria-label", "Category");
+    if (override) sel.setAttribute("data-override", "true");
     [
       { id: "technical", label: "Technical" },
       { id: "hobby", label: "Hobby" },
@@ -147,10 +149,8 @@ function renderVideosFromVideoArray(vids) {
       sel.appendChild(o);
     });
     sel.value = value;
-    sel.title = override ? "Manually set" : "Inferred from title";
 
     sel.addEventListener("change", async () => {
-      // Always treat selection as an override.
       await setCategoryOverride(v.videoId, sel.value);
       await render();
     });

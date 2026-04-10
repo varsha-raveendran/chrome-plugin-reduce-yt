@@ -459,18 +459,6 @@ async function renderAll(period) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Back button
-  $("backBtn").addEventListener("click", () => {
-    const url = chrome.runtime.getURL("ui/app.html");
-    chrome.tabs.getCurrent((tab) => {
-      if (tab) {
-        chrome.tabs.update(tab.id, { url });
-      } else {
-        window.location.href = url;
-      }
-    });
-  });
-
   // Period buttons
   document.querySelectorAll(".periodBtn").forEach((btn) => {
     btn.addEventListener("click", () => {

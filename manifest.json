@@ -24,6 +24,7 @@
         "content/ui_modal.js",
         "content/session.js",
         "content/friction.js",
+        "content/notes.js",
         "content/main.js"
       ],
       "css": ["ui/modal.css"],

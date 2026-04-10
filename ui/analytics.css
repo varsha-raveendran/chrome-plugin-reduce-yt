@@ -197,6 +197,11 @@ body {
   border-color: rgba(110, 168, 254, 0.9);
 }
 
+.catSelect[data-override="true"] {
+  border-color: rgba(110, 168, 254, 0.5);
+  color: var(--accent);
+}
+
 .itemSub {
   margin-top: 4px;
   font-size: 11px;
