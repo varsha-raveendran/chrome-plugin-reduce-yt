@@ -1,0 +1,78 @@
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+@media (max-width: 640px) {
+  .grid4 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.chartGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 720px) {
+  .chartGrid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cards inside the grid shouldn't add their own bottom margin */
+.chartGrid2 > .card {
+  margin-bottom: 0;
+}
+
+.chartWrap {
+  margin-top: 14px;
+  width: 100%;
+  position: relative;
+}
+
+.chartWrap canvas {
+  width: 100% !important;
+  display: block;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+.periodBtn.active {
+  background: rgba(110, 168, 254, 0.22);
+  border-color: rgba(110, 168, 254, 0.7);
+  color: var(--accent);
+}
+
+.emptyChart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  color: var(--muted);
+  font-size: 13px;
+}

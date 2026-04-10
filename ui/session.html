@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube Intent — Session</title>
+    <link rel="stylesheet" href="./analytics.css" />
+    <style>
+      body { width: auto; }
+      .wrap { max-width: 860px; margin: 0 auto; }
+      .itemTitle { max-width: 640px; }
+    </style>
+  </head>
+  <body>
+    <main class="wrap" aria-label="Past session analytics">
+      <header class="top">
+        <div class="title">Session Analytics</div>
+        <div class="muted" id="status">Loading…</div>
+      </header>
+
+      <section class="card">
+        <div class="row">
+          <div class="label">Intent</div>
+          <div class="value" id="intent">—</div>
+        </div>
+        <div class="grid2">
+          <div class="kpi">
+            <div class="kpiLabel">Elapsed</div>
+            <div class="kpiValue" id="elapsed">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpiLabel">Active (focused)</div>
+            <div class="kpiValue" id="active">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpiLabel">Videos opened</div>
+            <div class="kpiValue" id="videosOpened">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpiLabel">Unique videos</div>
+            <div class="kpiValue" id="uniqueVideos">—</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="sectionTitle">Top videos</div>
+        <div id="categoryBox" class="catBox" aria-label="Category breakdown" style="display:none"></div>
+        <ol class="list" id="videoList" aria-label="Videos watched list"></ol>
+        <div class="muted small" id="emptyVideos" style="display:none">No videos recorded for this session.</div>
+      </section>
+    </main>
+
+    <script src="./categorize.js"></script>
+    <script src="./session.js"></script>
+  </body>
+</html>
+

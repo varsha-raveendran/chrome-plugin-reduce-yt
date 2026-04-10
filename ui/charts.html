@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube Intent — Analytics</title>
+    <link rel="stylesheet" href="./analytics.css" />
+    <link rel="stylesheet" href="./charts.css" />
+    <style>
+      body { width: auto; }
+      .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 24px; }
+    </style>
+  </head>
+  <body>
+    <main class="wrap" aria-label="YouTube Intent Analytics">
+      <header class="top">
+        <div class="title">Analytics</div>
+        <div class="row" style="gap:8px">
+          <button id="backBtn" class="btn">← Back</button>
+          <div class="muted" id="status">Loading…</div>
+        </div>
+      </header>
+
+      <!-- Period selector -->
+      <section class="card">
+        <div class="row spread">
+          <div class="sectionTitle" style="margin:0">Aggregation period</div>
+          <div class="row" style="gap:6px">
+            <button class="btn periodBtn active" data-period="daily">Daily</button>
+            <button class="btn periodBtn" data-period="weekly">Weekly</button>
+            <button class="btn periodBtn" data-period="monthly">Monthly</button>
+            <button class="btn periodBtn" data-period="yearly">Yearly</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- KPI summary -->
+      <section class="card">
+        <div class="sectionTitle">Overall summary</div>
+        <div class="grid4" id="kpiGrid">
+          <div class="kpi"><div class="kpiLabel">Total sessions</div><div class="kpiValue" id="kpiSessions">—</div></div>
+          <div class="kpi"><div class="kpiLabel">Total active time</div><div class="kpiValue" id="kpiTotal">—</div></div>
+          <div class="kpi"><div class="kpiLabel">Avg session length</div><div class="kpiValue" id="kpiAvg">—</div></div>
+          <div class="kpi"><div class="kpiLabel">Total videos</div><div class="kpiValue" id="kpiVideos">—</div></div>
+        </div>
+      </section>
+
+      <!-- row: category + time of day -->
+      <div class="chartGrid2">
+        <!-- 1. Average time per category -->
+        <section class="card">
+          <div class="sectionTitle">Avg watch time per category</div>
+          <div class="muted small">Mean active watch time per session, by category.</div>
+          <div class="chartWrap">
+            <canvas id="categoryChart" height="240"></canvas>
+          </div>
+          <div class="legend" id="categoryLegend"></div>
+        </section>
+
+        <!-- 2. Time of day distribution -->
+        <section class="card">
+          <div class="sectionTitle">Sessions by time of day</div>
+          <div class="muted small">When you typically start YouTube sessions (hour of day).</div>
+          <div class="chartWrap">
+            <canvas id="timeOfDayChart" height="240"></canvas>
+          </div>
+        </section>
+      </div>
+
+      <!-- 3. Period totals — full width -->
+      <section class="card">
+        <div class="sectionTitle" id="periodChartTitle">Daily totals</div>
+        <div class="muted small">Total active watch time per period.</div>
+        <div class="chartWrap">
+          <canvas id="periodChart" height="240"></canvas>
+        </div>
+      </section>
+    </main>
+
+    <script src="./categorize.js"></script>
+    <script src="./charts.js"></script>
+  </body>
+</html>

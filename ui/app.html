@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube Intent — Analytics</title>
+    <link rel="stylesheet" href="./analytics.css" />
+    <style>
+      body { width: auto; }
+      .wrap { max-width: 980px; margin: 0 auto; }
+      .itemTitle { max-width: 680px; }
+    </style>
+  </head>
+  <body>
+    <!-- Reuse the popup analytics UI + logic, but in a full tab -->
+    <main class="wrap" aria-label="YouTube session analytics (full page)">
+      <header class="top">
+        <div class="title">YouTube Intent</div>
+        <div class="muted" id="status">Loading…</div>
+      </header>
+
+      <section class="card">
+        <div class="row">
+          <div class="label" id="intentLabel">Current intent</div>
+          <div class="value" id="intent">—</div>
+        </div>
+        <div class="grid2">
+          <div class="kpi">
+            <div class="kpiLabel">Elapsed</div>
+            <div class="kpiValue" id="elapsed">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpiLabel">Active (focused)</div>
+            <div class="kpiValue" id="active">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpiLabel">Videos opened</div>
+            <div class="kpiValue" id="videosOpened">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpiLabel">Unique videos</div>
+            <div class="kpiValue" id="uniqueVideos">—</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="openYoutube" class="btn">Open YouTube</button>
+          <button id="viewAnalytics" class="btn">View Analytics</button>
+          <button id="endSession" class="btn danger">End Session</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="sectionTitle">Top videos (this session)</div>
+        <div class="muted small">Watch time is “active time” attributed while the tab is visible + focused.</div>
+        <div id="categoryBox" class="catBox" aria-label="Category breakdown" style="display:none"></div>
+        <ol class="list" id="videoList" aria-label="Videos watched list"></ol>
+        <div class="muted small" id="emptyVideos" style="display:none">No videos tracked yet.</div>
+      </section>
+
+      <section class="card">
+        <div class="row spread">
+          <div>
+            <div class="sectionTitle">Recent sessions</div>
+            <div class="muted small">Last 20 sessions (saved when you click “End Session”).</div>
+          </div>
+          <button id="clearHistory" class="btn">Clear</button>
+        </div>
+        <ol class="list" id="historyList" aria-label="Session history list"></ol>
+        <div class="muted small" id="emptyHistory" style="display:none">No session history yet.</div>
+      </section>
+    </main>
+
+    <script src="./categorize.js"></script>
+    <script src="./analytics.js"></script>
+  </body>
+</html>
+

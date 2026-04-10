@@ -1,0 +1,187 @@
+:root {
+  --pn-overlay: rgba(0, 0, 0, 0.72);
+  --pn-surface: #111318;
+  --pn-text: #f2f4f8;
+  --pn-muted: rgba(242, 244, 248, 0.75);
+  --pn-border: rgba(242, 244, 248, 0.16);
+  --pn-accent: #6ea8fe;
+  --pn-danger: #ff6b6b;
+  --pn-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
+  --pn-radius: 14px;
+  --pn-font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+#pn-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: none;
+}
+
+#pn-root[data-open="true"] {
+  display: block;
+}
+
+.pn-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--pn-overlay);
+  backdrop-filter: blur(2px);
+}
+
+.pn-modal {
+  position: absolute;
+  left: 50%;
+  top: 12vh;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 32px));
+  background: var(--pn-surface);
+  color: var(--pn-text);
+  border: 1px solid var(--pn-border);
+  border-radius: var(--pn-radius);
+  box-shadow: var(--pn-shadow);
+  font-family: var(--pn-font);
+}
+
+.pn-modal-inner {
+  padding: 18px 18px 14px;
+}
+
+.pn-title {
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: 0.2px;
+  margin: 0 0 10px;
+}
+
+.pn-body {
+  margin: 0 0 14px;
+  color: var(--pn-muted);
+  line-height: 1.45;
+  font-size: 14px;
+}
+
+.pn-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--pn-border);
+  color: var(--pn-text);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.pn-input:focus {
+  border-color: rgba(110, 168, 254, 0.9);
+  box-shadow: 0 0 0 3px rgba(110, 168, 254, 0.18);
+}
+
+.pn-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.pn-btn {
+  appearance: none;
+  border: 1px solid var(--pn-border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--pn-text);
+  padding: 9px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.pn-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(110, 168, 254, 0.18);
+  border-color: rgba(110, 168, 254, 0.9);
+}
+
+.pn-btn.primary {
+  background: rgba(110, 168, 254, 0.2);
+  border-color: rgba(110, 168, 254, 0.55);
+}
+
+.pn-btn.danger {
+  background: rgba(255, 107, 107, 0.18);
+  border-color: rgba(255, 107, 107, 0.55);
+}
+
+.pn-kpi {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--pn-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--pn-muted);
+  font-size: 13px;
+}
+
+/* Friction overlay */
+.pn-friction {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: none;
+}
+
+.pn-friction[data-open="true"] {
+  display: block;
+}
+
+.pn-friction-card {
+  position: absolute;
+  left: 50%;
+  top: 14vh;
+  transform: translateX(-50%);
+  width: min(520px, calc(100vw - 32px));
+  background: var(--pn-surface);
+  color: var(--pn-text);
+  border: 1px solid var(--pn-border);
+  border-radius: var(--pn-radius);
+  box-shadow: var(--pn-shadow);
+  font-family: var(--pn-font);
+  padding: 16px 16px 14px;
+}
+
+.pn-friction-title {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pn-friction-sub {
+  margin: 0 0 10px;
+  color: var(--pn-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.pn-progress {
+  height: 8px;
+  width: 100%;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  border: 1px solid var(--pn-border);
+}
+
+.pn-progress > div {
+  height: 100%;
+  width: 0%;
+  background: rgba(110, 168, 254, 0.75);
+}
+
+.pn-friction-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
