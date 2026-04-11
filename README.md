@@ -6,8 +6,8 @@ A Chrome extension (Manifest V3) that reduces unconscious YouTube usage through 
 
 ## Features
 
-- **Intent modal** — blocks the page when you open YouTube and asks what you're here to do. Requires a non-empty intent, a max session time (minutes), and optional allowed topic keywords to start.
-- **Friction overlay** — optional 3-second "Still want to watch?" overlay when you click a video thumbnail. Auto-navigates after the countdown; Skip/Cancel/Escape/Enter all work. Shows an intent-match indicator (👏 on track / 😢 off track) based on keyword overlap with your session intent. After 5 skips, shows a nudge message.
+- **Intent modal** — blocks the page when you open YouTube and asks what you're here to do. Requires a non-empty intent, a max session time (minutes), an optional category (Technical / Hobby / Travel / Entertainment), and optional allowed topic keywords to start.
+- **Friction overlay** — "Still want to watch?" overlay when you click a video thumbnail. Auto-navigates after the countdown (3 seconds for technical sessions, 60 seconds otherwise); Skip/Cancel/Escape/Enter all work. Shows an intent-match indicator based on semantic topic inference against your session intent and category. After 5 skips, shows a nudge message.
 - **Burst intervention** — check-in modal fires when you open 5+ videos within 3 minutes.
 - **Duration intervention** — check-in modal and browser notification fire when the session's max time is reached (via background alarm), with a 2-minute cooldown after dismissal.
 - **Active-time tracking** — watch time is counted while the tab is visible (window focus is not required).
@@ -63,7 +63,8 @@ ui/
 
 When starting a session you set:
 - **Max time** — how many minutes you allow yourself (default 20). Shown in the popup. When elapsed time crosses this limit, a browser notification fires and an in-page check-in modal appears.
-- **Allowed topics** — optional comma-separated keywords (e.g. `react, cooking`). The friction overlay uses these to tell you whether a video is on- or off-topic.
+- **Category** — optional broad category for the session (Technical, Hobby, Travel, Entertainment). Used by the friction overlay to infer relevance and set the countdown duration (3s for Technical, 60s for all others).
+- **Allowed topics** — optional comma-separated keywords (e.g. `react, cooking`). Takes precedence over category-based inference in the friction overlay.
 
 ### Interventions
 
@@ -76,13 +77,20 @@ The check-in modal shows your stated intent and current stats. You can continue 
 
 ### Friction overlay
 
-When enabled in settings, clicking any video thumbnail shows a 3-second countdown card with the video title. Navigation is automatic after the countdown, or you can:
+When enabled in settings, clicking any video thumbnail shows a countdown card with the video title. Navigation is automatic after the countdown, or you can:
 - **Skip** — navigate immediately
 - **Cancel** — go back
 - **Escape** — cancel
 - **Enter** — skip
 
-The overlay also shows an intent-match indicator: if the video title keywords overlap with your session intent, it shows 👏 "Looks on track with your intent"; otherwise 😢 "Doesn't seem related to your intent". After 5 skips in a session, the title changes to a nudge message asking if you're still on track.
+The countdown duration depends on your session category: **3 seconds** for Technical sessions, **60 seconds** for everything else.
+
+The overlay shows an intent-match indicator using a three-tier inference system:
+1. **Allowed topics** (if set) — exact keyword match against the title
+2. **Category** (if set) — checks the title against the expected topic domain
+3. **Semantic inference** — expands intent keywords with synonyms, then falls back to a broad topic taxonomy (tech, cooking, fitness, travel, music, gaming, entertainment, etc.)
+
+After 5 skips in a session, the title changes to a nudge message asking if you're still on track.
 
 ### Video notes
 
@@ -102,7 +110,7 @@ Titles are scored against keyword rules for Technical, Hobby, and Travel. Unmatc
 
 | Key | Contents |
 |---|---|
-| `pn_session` | Active session (intent, startTs, maxTimeMs, allowedTopics, active flag) |
+| `pn_session` | Active session (intent, startTs, maxTimeMs, allowedTopics, category, active flag) |
 | `pn_session_stats` | Current session stats (videos, watch times, nav events) |
 | `pn_session_history` | Last 20 completed sessions |
 | `pn_last_active` | Last user activity timestamp (for inactivity detection) |

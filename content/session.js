@@ -145,6 +145,10 @@
       return this._session?.allowedTopics || [];
     }
 
+    getCategory() {
+      return this._session?.category || "";
+    }
+
     async _loadSession() {
       this._session = await window.PN_Storage.getSession();
     }
@@ -267,7 +271,7 @@
       }
     }
 
-    async _startSession(intent, { maxTimeMs, allowedTopics } = {}) {
+    async _startSession(intent, { maxTimeMs, allowedTopics, category } = {}) {
       const startTs = now();
       this._session = {
         active: true,
@@ -275,6 +279,7 @@
         intent,
         maxTimeMs: maxTimeMs || 20 * 60 * 1000,
         allowedTopics: allowedTopics || [],
+        category: category || "",
         lastInterventionTs: 0
       };
       await window.PN_Storage.setSession(this._session);
@@ -388,6 +393,31 @@
       timeRow.appendChild(timeInput);
       wrapper.appendChild(timeRow);
 
+      // Category dropdown
+      const categoryRow = document.createElement("div");
+      categoryRow.style.cssText = "display:flex;flex-direction:column;gap:4px";
+      const categoryLabel = document.createElement("label");
+      categoryLabel.className = "pn-field-label";
+      categoryLabel.textContent = "Category";
+      const categorySelect = document.createElement("select");
+      categorySelect.className = "pn-input";
+      categorySelect.setAttribute("aria-label", "Session category");
+      [
+        { value: "",              label: "— Pick a category (optional) —" },
+        { value: "technical",     label: "Technical" },
+        { value: "hobby",         label: "Hobby" },
+        { value: "travel",        label: "Travel" },
+        { value: "entertainment", label: "Entertainment" },
+      ].forEach(({ value, label }) => {
+        const opt = document.createElement("option");
+        opt.value = value;
+        opt.textContent = label;
+        categorySelect.appendChild(opt);
+      });
+      categoryRow.appendChild(categoryLabel);
+      categoryRow.appendChild(categorySelect);
+      wrapper.appendChild(categoryRow);
+
       // Allowed topics field
       const topicsRow = document.createElement("div");
       topicsRow.style.cssText = "display:flex;flex-direction:column;gap:4px";
@@ -409,11 +439,12 @@
         onClick: async () => {
           const intent = (input.value || "").trim();
           const maxTimeMs = Math.max(1, parseInt(timeInput.value, 10) || 20) * 60 * 1000;
+          const category = categorySelect.value;
           const allowedTopics = (topicsInput.value || "")
             .split(",")
             .map((t) => t.trim().toLowerCase())
             .filter(Boolean);
-          await this._startSession(intent, { maxTimeMs, allowedTopics });
+          await this._startSession(intent, { maxTimeMs, allowedTopics, category });
           this._closeModal();
         }
       });
