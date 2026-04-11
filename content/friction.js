@@ -540,6 +540,10 @@
         window.PN_Storage.get(["pn_session_stats"]).then((data) => {
           const s = data.pn_session_stats || {};
           s.frictionSkips = (s.frictionSkips || 0) + 1;
+          const reason = (reasonInput.value || "").trim();
+          if (reason) {
+            s.frictionReasons = [...(s.frictionReasons || []), reason];
+          }
           window.PN_Storage.set({ pn_session_stats: s });
         }).catch(() => {});
         cleanup();

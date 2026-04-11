@@ -107,14 +107,24 @@
         </div>
       </section>
 
-      <!-- 7. Word cloud -->
-      <section class="card">
-        <div class="sectionTitle">Word cloud — video titles</div>
-        <div class="muted small">Most common words in videos you've watched. Bigger = more frequent.</div>
-        <div class="chartWrap">
-          <canvas id="wordCloudChart" height="200"></canvas>
-        </div>
-      </section>
+      <!-- 7. Word cloud — video titles + friction reasons -->
+      <div class="chartGrid2">
+        <section class="card">
+          <div class="sectionTitle">Word cloud — video titles</div>
+          <div class="muted small">Most common words in videos you've watched. Bigger = more frequent.</div>
+          <div class="chartWrap">
+            <canvas id="wordCloudChart" height="200"></canvas>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="sectionTitle">Word cloud — skip reasons</div>
+          <div class="muted small">Words from reasons you gave when skipping the friction overlay.</div>
+          <div class="chartWrap">
+            <canvas id="reasonWordCloudChart" height="200"></canvas>
+          </div>
+        </section>
+      </div>
 
       <!-- 8. Skip rate trend -->
       <section class="card">

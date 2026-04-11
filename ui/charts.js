@@ -385,6 +385,29 @@ function computeWordFrequency(history) {
 }
 
 /**
+ * Word frequency from friction reasons across all sessions.
+ * Returns [{ word, count }] sorted descending, top 40.
+ */
+function computeReasonWordFrequency(history) {
+  const freq = {};
+  for (const h of history) {
+    const reasons = Array.isArray(h.frictionReasons) ? h.frictionReasons : [];
+    for (const reason of reasons) {
+      const words = reason
+        .toLowerCase()
+        .replace(/[^a-z0-9 ]/g, " ")
+        .split(/\s+/)
+        .filter((w) => w.length > 2 && !WORD_STOPWORDS.has(w));
+      for (const w of words) freq[w] = (freq[w] || 0) + 1;
+    }
+  }
+  return Object.entries(freq)
+    .map(([word, count]) => ({ word, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 40);
+}
+
+/**
  * Session counts bucketed by day-of-week (0=Sun) × hour (0–23).
  * Returns number[7][24].
  */
@@ -508,6 +531,38 @@ function renderWordCloud(history) {
       y += size + 8;
     }
     if (y > h) return; // clip if canvas full
+
+    ctx.fillStyle = palette[i % palette.length];
+    ctx.fillText(word, x, y);
+    x += tw + 10;
+  });
+}
+
+function renderReasonWordCloud(history) {
+  const canvas = $("reasonWordCloudChart");
+  if (!canvas) return;
+  const words = computeReasonWordFrequency(history);
+  if (words.length === 0) { showEmpty(canvas, "No friction reasons recorded yet."); return; }
+
+  const { ctx, w, h } = setupCanvas(canvas);
+
+  const maxCount = words[0].count;
+  const minSize = 11, maxSize = 32;
+  const palette = Object.values(CAT_COLORS);
+
+  const pad = 12;
+  let x = pad, y = pad + maxSize;
+
+  words.forEach(({ word, count }, i) => {
+    const size = Math.round(minSize + ((count / maxCount) * (maxSize - minSize)));
+    ctx.font = `${size}px system-ui, sans-serif`;
+    const tw = ctx.measureText(word).width;
+
+    if (x + tw + pad > w) {
+      x = pad;
+      y += size + 8;
+    }
+    if (y > h) return;
 
     ctx.fillStyle = palette[i % palette.length];
     ctx.fillText(word, x, y);
@@ -671,6 +726,7 @@ async function renderAll(period) {
   renderHeatmapChart(history);
   renderWatchVsIntendedChart(history);
   renderWordCloud(history);
+  renderReasonWordCloud(history);
   renderSkipRateTrendChart(history);
 }
 

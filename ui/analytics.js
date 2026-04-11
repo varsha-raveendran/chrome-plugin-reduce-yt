@@ -384,7 +384,8 @@ async function appendSessionHistorySnapshot({ session, stats }) {
     uniqueVideos: Object.keys(videosMap).length,
     topVideos,
     maxTimeMs: session.maxTimeMs || 0,
-    frictionSkips: stats?.frictionSkips || 0
+    frictionSkips: stats?.frictionSkips || 0,
+    frictionReasons: Array.isArray(stats?.frictionReasons) ? stats.frictionReasons : []
   });
   await chrome.storage.local.set({ [KEYS.sessionHistory]: arr.slice(-20) });
 }
