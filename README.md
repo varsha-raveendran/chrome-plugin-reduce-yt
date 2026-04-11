@@ -6,13 +6,13 @@ A Chrome extension (Manifest V3) that reduces unconscious YouTube usage through 
 
 ## Features
 
-- **Intent modal** — blocks the page when you open YouTube and asks what you're here to do. Requires a non-empty intent to start.
+- **Intent modal** — blocks the page when you open YouTube and asks what you're here to do. Requires a non-empty intent, a max session time (minutes), and optional allowed topic keywords to start.
 - **Friction overlay** — optional 3-second "Still want to watch?" overlay when you click a video thumbnail. Auto-navigates after the countdown; Skip/Cancel/Escape/Enter all work. Shows an intent-match indicator (👏 on track / 😢 off track) based on keyword overlap with your session intent. After 5 skips, shows a nudge message.
 - **Burst intervention** — check-in modal fires when you open 5+ videos within 3 minutes.
-- **Duration intervention** — check-in modal fires at the 20-minute mark (via background alarm), with a 2-minute cooldown after dismissal.
+- **Duration intervention** — check-in modal and browser notification fire when the session's max time is reached (via background alarm), with a 2-minute cooldown after dismissal.
 - **Active-time tracking** — watch time is counted while the tab is visible (window focus is not required).
 - **Video categorization** — titles are scored with keyword heuristics into Technical, Hobby, Travel, or Entertainment. Categories can be manually overridden per-video.
-- **Session analytics popup** — click the toolbar icon to see current intent, elapsed/active time, videos opened, unique videos, top videos by watch time, category breakdown, and recent session history.
+- **Session analytics popup** — click the toolbar icon to see current intent, elapsed/active time, max time limit, videos opened, unique videos, top videos by watch time, category breakdown, and recent session history.
 - **Full analytics page** — aggregated charts (daily/weekly/monthly/yearly) for category watch time, sessions by time of day, and period totals.
 - **Session history** — last 20 completed sessions saved to local storage; click any entry to open a detail view.
 - **Video notes** — floating Notes button on watch pages lets you jot thoughts per video, auto-saved per session. View, filter, and delete all notes from the Notes tab.
@@ -59,12 +59,18 @@ ui/
 | 30+ min of inactivity | Intent modal shown again on return |
 | End Session clicked | Session saved to history, tab closed |
 
+### Session limits
+
+When starting a session you set:
+- **Max time** — how many minutes you allow yourself (default 20). Shown in the popup. When elapsed time crosses this limit, a browser notification fires and an in-page check-in modal appears.
+- **Allowed topics** — optional comma-separated keywords (e.g. `react, cooking`). The friction overlay uses these to tell you whether a video is on- or off-topic.
+
 ### Interventions
 
 | Trigger | Condition |
 |---|---|
 | Burst | 5+ video navigations within 3 minutes |
-| Duration | 20-minute session (background alarm) |
+| Duration | Elapsed time ≥ session max time (checked every minute by background alarm) |
 
 The check-in modal shows your stated intent and current stats. You can continue or end the session.
 
@@ -96,7 +102,7 @@ Titles are scored against keyword rules for Technical, Hobby, and Travel. Unmatc
 
 | Key | Contents |
 |---|---|
-| `pn_session` | Active session (intent, startTs, active flag) |
+| `pn_session` | Active session (intent, startTs, maxTimeMs, allowedTopics, active flag) |
 | `pn_session_stats` | Current session stats (videos, watch times, nav events) |
 | `pn_session_history` | Last 20 completed sessions |
 | `pn_last_active` | Last user activity timestamp (for inactivity detection) |

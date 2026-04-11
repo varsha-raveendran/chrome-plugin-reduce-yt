@@ -295,6 +295,9 @@ async function render() {
   $("active").textContent = active ? fmtDuration(stats?.totalActiveMs || 0) : "—";
   $("videosOpened").textContent = active ? String(stats?.videosWatched || 0) : "—";
   $("uniqueVideos").textContent = active ? String(Object.keys(stats?.videos || {}).length) : "—";
+  $("maxTime").textContent = active && session?.maxTimeMs
+    ? `${Math.round(session.maxTimeMs / 60000)}m`
+    : "—";
 
   const endBtn = $("endSession");
   if (endBtn) {

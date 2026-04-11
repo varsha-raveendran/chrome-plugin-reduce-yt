@@ -294,7 +294,7 @@
       try {
         chrome.runtime.sendMessage({
           type: "PN_SESSION_STARTED",
-          payload: { intent, startTs }
+          payload: { intent, startTs, maxTimeMs: this._session.maxTimeMs }
         });
       } catch {}
     }

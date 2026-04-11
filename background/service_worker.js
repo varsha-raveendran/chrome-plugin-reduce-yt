@@ -51,12 +51,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     if (msg.type === "PN_SESSION_STARTED") {
       const tabId = sender?.tab?.id ?? null;
-      const { intent, startTs } = msg.payload || {};
+      const { intent, startTs, maxTimeMs } = msg.payload || {};
 
       const session = {
         active: true,
         startTs: typeof startTs === "number" ? startTs : now(),
         intent: typeof intent === "string" ? intent : "",
+        maxTimeMs: typeof maxTimeMs === "number" && maxTimeMs > 0 ? maxTimeMs : 20 * 60 * 1000,
         tabId,
         lastInterventionTs: 0,
         durationIntervened: false
@@ -127,18 +128,41 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     if (!session || !session.active) return;
 
     const elapsedMs = now() - session.startTs;
+    const maxTimeMs = session.maxTimeMs || 20 * 60 * 1000;
 
-    if (!session.durationIntervened && session.tabId != null) {
-      // Send elapsed time every minute; content script decides when to intervene
-      // based on the session's own maxTimeMs setting.
-      try {
-        await chrome.tabs.sendMessage(session.tabId, {
-          type: "PN_DURATION_THRESHOLD",
-          payload: { elapsedMs }
-        });
-      } catch {
-        // Tab might be gone; ignore.
+    if (!session.durationIntervened && elapsedMs >= maxTimeMs) {
+      // Fire a browser notification so the user is alerted even if the tab is in background.
+      const elapsedMin = Math.floor(elapsedMs / 60000);
+      // 1x1 transparent PNG as fallback icon (Chrome requires iconUrl).
+      const ICON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+      chrome.notifications.create("pn_duration", {
+        type: "basic",
+        iconUrl: ICON,
+        title: "Time's up — Procrastinate Not",
+        message: `You've been on YouTube for ${elapsedMin} min. Your limit was ${Math.floor(maxTimeMs / 60000)} min.`,
+        priority: 2
+      });
+
+      // Also tell the content script to show the in-page check-in modal.
+      if (session.tabId != null) {
+        try {
+          await chrome.tabs.sendMessage(session.tabId, {
+            type: "PN_DURATION_THRESHOLD",
+            payload: { elapsedMs }
+          });
+        } catch {
+          // Tab might be gone; ignore.
+        }
       }
+
+      // Mark as intervened so notification/modal don't repeat.
+      await setLocal({
+        [STORAGE_KEYS.session]: {
+          ...session,
+          durationIntervened: true,
+          lastInterventionTs: now()
+        }
+      });
     }
   })().catch(() => {});
 });

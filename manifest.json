@@ -3,7 +3,7 @@
   "name": "Procrastinate Not (YouTube Intent)",
   "version": "0.1.0",
   "description": "Reduce unconscious YouTube usage through intent-setting and lightweight nudges.",
-  "permissions": ["storage", "tabs", "alarms"],
+  "permissions": ["storage", "tabs", "alarms", "notifications"],
   "host_permissions": ["https://www.youtube.com/*"],
   "background": {
     "service_worker": "background/service_worker.js",
