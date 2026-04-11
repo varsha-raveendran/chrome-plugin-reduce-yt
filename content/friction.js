@@ -58,7 +58,7 @@
     const skipBtn = document.createElement("button");
     skipBtn.className = "pn-btn primary";
     skipBtn.type = "button";
-    skipBtn.textContent = "Skip";
+    skipBtn.textContent = "Skip wait";
     skipBtn.disabled = true;
     skipBtn.style.opacity = "0.45";
 
@@ -72,7 +72,7 @@
 
     const kbHint = document.createElement("div");
     kbHint.style.cssText = "font-size:11px;color:rgba(242,244,248,0.45);text-align:right;margin-top:6px";
-    kbHint.textContent = "Esc to cancel · Enter to watch";
+    kbHint.textContent = "Esc to cancel · Enter to skip wait";
 
     card.appendChild(title);
     card.appendChild(sub);
