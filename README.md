@@ -6,6 +6,8 @@ You opened YouTube to watch one video. Forty minutes later you're deep in a comp
 
 **SWTW** is a Chrome extension I built for myself to fix exactly that. Before you can watch anything, it asks you what you're actually here for. Then it gets mildly annoying about it: a countdown overlay when you click a video, check-ins when you've been spiraling for too long, and an honest tally of how you spent your time. It's not meant to block YouTube; it's meant to make unconscious usage a little more conscious.
 
+https://github.com/user-attachments/assets/c98cb22b-3f0e-4d14-a3e7-76956476ce60
+
 ## Features
 
 - **Intent gate:** YouTube won't let you in until you say why you're there. Takes 5 seconds and saves you from 45 minutes of drift.
