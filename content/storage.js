@@ -57,6 +57,11 @@
     return { frictionEnabled: true, ...(stored || {}) };
   }
 
+  async function setSettings(updates) {
+    const current = await getSettings();
+    await set({ [STORAGE_KEYS.settings]: { ...current, ...updates } });
+  }
+
   window.PN_Storage = {
     get,
     set,
@@ -65,7 +70,8 @@
     setSession,
     getLastActive,
     setLastActive,
-    getSettings
+    getSettings,
+    setSettings
   };
 })();
 

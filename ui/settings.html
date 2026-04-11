@@ -1,0 +1,247 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube Intent — Settings</title>
+    <link rel="stylesheet" href="./analytics.css" />
+    <style>
+      body { width: auto; }
+      .wrap { max-width: 980px; margin: 0 auto; }
+
+      .tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 12px;
+      }
+      .tab {
+        appearance: none;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        padding: 7px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 12px;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .tab.active {
+        background: rgba(110, 168, 254, 0.15);
+        border-color: rgba(110, 168, 254, 0.55);
+        color: var(--text);
+      }
+      .tab:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+      }
+
+      .fieldRow {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .fieldRow input, .fieldRow select {
+        flex: 1;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-family: var(--font);
+        outline: none;
+        box-sizing: border-box;
+      }
+      .fieldRow input:focus, .fieldRow select:focus {
+        border-color: rgba(110, 168, 254, 0.9);
+        box-shadow: 0 0 0 3px rgba(110, 168, 254, 0.18);
+      }
+      .fieldRow select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(242,244,248,0.6)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+        cursor: pointer;
+      }
+      .fieldRow select option { background: #151925; color: #f2f4f8; }
+
+      .tagList {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 4px;
+        min-height: 28px;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(110, 168, 254, 0.12);
+        border: 1px solid rgba(110, 168, 254, 0.3);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 3px 10px 3px 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .tag button {
+        appearance: none;
+        border: none;
+        background: none;
+        color: var(--muted);
+        cursor: pointer;
+        padding: 0;
+        font-size: 14px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+      }
+      .tag button:hover { color: var(--danger); }
+
+      .sectionDesc {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 12px;
+        line-height: 1.5;
+      }
+
+      .toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .toggle input[type="checkbox"] { display: none; }
+      .toggleTrack {
+        width: 36px;
+        height: 20px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid var(--border);
+        position: relative;
+        transition: background 0.2s;
+        flex-shrink: 0;
+      }
+      .toggleTrack::after {
+        content: "";
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background: var(--muted);
+        border-radius: 50%;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.2s, background 0.2s;
+      }
+      .toggle input:checked + .toggleTrack {
+        background: rgba(110, 168, 254, 0.35);
+        border-color: rgba(110, 168, 254, 0.6);
+      }
+      .toggle input:checked + .toggleTrack::after {
+        transform: translateX(16px);
+        background: var(--accent);
+      }
+
+      .savedBadge {
+        font-size: 12px;
+        color: #34d399;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .savedBadge.visible { opacity: 1; }
+
+      .emptyHint {
+        font-size: 12px;
+        color: var(--muted);
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap" aria-label="Settings">
+      <header class="top">
+        <div class="title">YouTube Intent</div>
+        <div class="muted" id="status"></div>
+      </header>
+
+      <nav class="tabs" aria-label="Page tabs">
+        <a class="tab" href="./app.html">Session</a>
+        <a class="tab" href="./charts.html">Analytics</a>
+        <a class="tab" href="./notes.html">Notes</a>
+        <span class="tab active">Settings</span>
+      </nav>
+
+      <!-- General -->
+      <section class="card">
+        <div class="sectionTitle">General</div>
+        <div style="margin-top:10px">
+          <label class="toggle" aria-label="Enable friction overlay">
+            <input type="checkbox" id="frictionToggle" />
+            <span class="toggleTrack"></span>
+            <span style="font-size:13px;font-weight:600">Friction overlay</span>
+          </label>
+          <div class="muted small" style="margin-top:4px;margin-left:46px">Show a countdown when clicking a video thumbnail.</div>
+        </div>
+      </section>
+
+      <!-- Semantic Expansions -->
+      <section class="card">
+        <div class="row spread">
+          <div class="sectionTitle">Semantic expansions</div>
+          <span class="savedBadge" id="expSaved">Saved</span>
+        </div>
+        <p class="sectionDesc">
+          When you type an intent like "react", the extension also searches for its synonyms in the video title.
+          Add or remove synonyms for any topic keyword here. Built-in defaults are always active; entries here extend them.
+        </p>
+
+        <div class="fieldRow" style="margin-bottom:12px">
+          <input id="expTopic" type="text" placeholder="Topic (e.g. react)" autocomplete="off" />
+          <input id="expSynonyms" type="text" placeholder="Synonyms, comma-separated (e.g. hooks, jsx, component)" autocomplete="off" style="flex:2" />
+          <button class="btn" id="expAddBtn">Add</button>
+        </div>
+
+        <div id="expList" aria-label="Custom semantic expansions" style="display:flex;flex-direction:column;gap:10px"></div>
+        <div class="emptyHint" id="expEmpty">No custom expansions yet.</div>
+      </section>
+
+      <!-- Topic Taxonomy -->
+      <section class="card">
+        <div class="row spread">
+          <div class="sectionTitle">Topic taxonomy</div>
+          <span class="savedBadge" id="taxSaved">Saved</span>
+        </div>
+        <p class="sectionDesc">
+          Maps individual words to broad topic categories used for intent matching.
+          For example, mapping "bouldering" → fitness means videos with that word are treated as fitness content.
+        </p>
+
+        <div class="fieldRow" style="margin-bottom:12px">
+          <input id="taxTerm" type="text" placeholder="Term (e.g. bouldering)" autocomplete="off" />
+          <select id="taxCategory">
+            <option value="tech">Technical</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="cooking">Cooking</option>
+            <option value="fitness">Fitness</option>
+            <option value="travel">Travel</option>
+            <option value="music">Music</option>
+            <option value="gaming">Gaming</option>
+            <option value="finance">Finance</option>
+            <option value="science">Science</option>
+          </select>
+          <button class="btn" id="taxAddBtn">Add</button>
+        </div>
+
+        <div id="taxList" aria-label="Custom topic taxonomy" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div class="emptyHint" id="taxEmpty">No custom taxonomy entries yet.</div>
+      </section>
+    </main>
+
+    <script src="./settings.js"></script>
+  </body>
+</html>

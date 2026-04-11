@@ -379,6 +379,27 @@
     async init() {
       const settings = await window.PN_Storage.getSettings();
       if (!settings?.frictionEnabled) return;
+
+      // Merge user-defined semantic rules from settings into the live maps.
+      // customExpansions: { [topic]: [synonym, ...] }
+      // customTaxonomy:   { [term]: "category" }
+      if (settings.customExpansions) {
+        for (const [topic, synonyms] of Object.entries(settings.customExpansions)) {
+          const key = topic.toLowerCase().trim();
+          if (!key || !Array.isArray(synonyms)) continue;
+          SEMANTIC_EXPANSIONS[key] = [
+            ...(SEMANTIC_EXPANSIONS[key] || []),
+            ...synonyms.map((s) => s.toLowerCase().trim()).filter(Boolean),
+          ];
+        }
+      }
+      if (settings.customTaxonomy) {
+        for (const [term, category] of Object.entries(settings.customTaxonomy)) {
+          const key = term.toLowerCase().trim();
+          if (key && category) TOPIC_TAXONOMY[key] = category.toLowerCase().trim();
+        }
+      }
+
       this._wire();
     }
 

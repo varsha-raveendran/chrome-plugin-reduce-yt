@@ -16,6 +16,7 @@ A Chrome extension (Manifest V3) that reduces unconscious YouTube usage through 
 - **Full analytics page** — aggregated charts (daily/weekly/monthly/yearly) for category watch time, sessions by time of day, and period totals.
 - **Session history** — last 20 completed sessions saved to local storage; click any entry to open a detail view.
 - **Video notes** — floating Notes button on watch pages lets you jot thoughts per video, auto-saved per session. View, filter, and delete all notes from the Notes tab.
+- **Settings page** — configure the friction overlay toggle, add custom semantic expansions (topic → synonyms), and add custom topic taxonomy entries (term → category). Custom rules extend the built-in defaults and take effect on the next page load.
 
 ## Project structure
 
@@ -38,7 +39,8 @@ ui/
   session.html/.js        — per-session detail view
   categorize.js           — title-scoring categorization logic
   notes.html/.js          — Notes tab (view, filter, delete all notes)
-  app.html                — full-page session view (Session / Analytics / Notes tabs)
+  settings.html/.js       — Settings tab (friction toggle, custom expansions, custom taxonomy)
+  app.html                — full-page session view (Session / Analytics / Notes / Settings tabs)
   modal.css               — friction, intent modal, and notes panel styles
 ```
 
@@ -92,6 +94,16 @@ The overlay shows an intent-match indicator using a three-tier inference system:
 
 After 5 skips in a session, the title changes to a nudge message asking if you're still on track.
 
+### Settings
+
+Open the full-page view and click the **Settings** tab. Options:
+
+- **Friction overlay** — toggle the countdown overlay on/off without opening `chrome://extensions`
+- **Semantic expansions** — add synonyms for any intent keyword. Example: add `bouldering` with synonyms `climbing, crimp, overhang` so that intent matches against those title words too. Synonyms can be removed individually or the whole topic group deleted.
+- **Topic taxonomy** — map any word to a broad category (Technical, Entertainment, Cooking, Fitness, Travel, Music, Gaming, Finance, Science). Example: `bouldering → Fitness`. Used by the friction overlay's category-based inference. Entries are deletable.
+
+Custom rules extend the built-in defaults and take effect on the next YouTube page load.
+
 ### Video notes
 
 A floating **📝 Notes** button appears on any YouTube watch page. Clicking it opens a side panel where you can write and save notes for the current video. Notes are scoped to the video and session, and stored locally (up to 500 entries).
@@ -114,6 +126,6 @@ Titles are scored against keyword rules for Technical, Hobby, and Travel. Unmatc
 | `pn_session_stats` | Current session stats (videos, watch times, nav events) |
 | `pn_session_history` | Last 20 completed sessions |
 | `pn_last_active` | Last user activity timestamp (for inactivity detection) |
-| `pn_settings` | `{ frictionEnabled: true/false }` |
+| `pn_settings` | `{ frictionEnabled, customExpansions, customTaxonomy }` |
 | `pn_category_overrides` | `{ [videoId]: category }` manual overrides |
 | `pn_notes` | Array of note objects (max 500) — videoId, title, url, sessionIntent, entries |
