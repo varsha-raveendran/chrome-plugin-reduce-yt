@@ -1,22 +1,24 @@
-# Procrastinate Not — YouTube Intent
+# Still Want To Watch? (SWTW)
 
 > Vibe coded with [Claude](https://claude.ai) and [Cursor](https://cursor.sh)
 
-A Chrome extension (Manifest V3) that reduces unconscious YouTube usage through intent-setting, lightweight friction, and session analytics.
+You opened YouTube to watch one video. Forty minutes later you're deep in a compilation of cats failing to jump onto things. We've all been there.
+
+**SWTW** is a Chrome extension I built for myself to fix exactly that. Before you can watch anything, it asks you what you're actually here for. Then it gets mildly annoying about it — a countdown overlay when you click a video, check-ins when you've been spiraling for too long, and an honest tally of how you spent your time. It's not meant to block YouTube; it's meant to make unconscious usage a little more conscious.
 
 ## Features
 
-- **Intent modal** — blocks the page when you open YouTube and asks what you're here to do. Requires a non-empty intent, a max session time (minutes), an optional category (Technical / Hobby / Travel / Entertainment), and optional allowed topic keywords to start.
-- **Friction overlay** — "Still want to watch?" overlay when you click a video thumbnail. Auto-navigates after the countdown (3 seconds for technical sessions, 60 seconds otherwise); Skip/Cancel/Escape/Enter all work. Shows an intent-match indicator based on semantic topic inference against your session intent and category. After 5 skips, shows a nudge message.
-- **Burst intervention** — check-in modal fires when you open 5+ videos within 3 minutes.
-- **Duration intervention** — check-in modal and browser notification fire when the session's max time is reached (via background alarm), with a 2-minute cooldown after dismissal.
-- **Active-time tracking** — watch time is counted while the tab is visible (window focus is not required).
-- **Video categorization** — titles are scored with keyword heuristics into Technical, Hobby, Travel, or Entertainment. Categories can be manually overridden per-video.
-- **Session analytics popup** — click the toolbar icon to see current intent, elapsed/active time, max time limit, videos opened, unique videos, top videos by watch time, category breakdown, and recent session history.
-- **Full analytics page** — aggregated charts (daily/weekly/monthly/yearly) for category watch time, sessions by time of day, and period totals.
-- **Session history** — last 20 completed sessions saved to local storage; click any entry to open a detail view.
-- **Video notes** — floating Notes button on watch pages lets you jot thoughts per video, auto-saved per session. View, filter, and delete all notes from the Notes tab.
-- **Settings page** — configure the friction overlay toggle, add custom semantic expansions (topic → synonyms), and add custom topic taxonomy entries (term → category). Custom rules extend the built-in defaults and take effect on the next page load.
+- **Intent gate** — YouTube won't let you in until you say why you're there. Takes 5 seconds and saves you from 45 minutes of drift.
+- **Friction overlay** — click a thumbnail and get a "still want to watch this?" moment before it loads. Shows whether the video actually matches what you said you were here for. After 5 skips in a row, it starts asking if you're still on track.
+- **Burst check-in** — opened 5 videos in 3 minutes? SWTW notices and checks in.
+- **Duration check-in** — hit your time limit and you'll get a nudge (in-page modal + browser notification) asking if you meant to still be here.
+- **Active-time tracking** — only counts time when you're actually on the tab, not just when it's open in the background.
+- **Video categorization** — tags each video as Technical, Hobby, Travel, Finance, News, or Entertainment based on the title. You can override any video's category if it got it wrong.
+- **Session popup** — click the toolbar icon for a quick snapshot: your intent, time spent, videos watched, and how the session's going.
+- **Full analytics** — daily, weekly, monthly, and yearly breakdowns of what you actually watched and when.
+- **Session history** — last 20 sessions saved locally, each one clickable for a full breakdown.
+- **Video notes** — a floating notes panel on watch pages so you can jot things down while watching. All notes are searchable and filterable from the Notes tab.
+- **Settings** — toggle the friction overlay, teach SWTW new synonyms for your intent keywords, or remap words to categories. Your rules layer on top of the defaults.
 
 ## Project structure
 
@@ -116,7 +118,7 @@ The **Notes tab** (`notes.html`) lets you:
 
 ### Video categorization
 
-Titles are scored against keyword rules for Technical, Hobby, and Travel. Unmatched videos fall into Entertainment. You can override any video's category in the popup; overrides persist in local storage.
+Titles are scored against keyword rules for Technical, Hobby, Travel, Finance, and News. Unmatched videos fall into Entertainment. You can override any video's category in the popup; overrides persist in local storage.
 
 ## Storage keys
 

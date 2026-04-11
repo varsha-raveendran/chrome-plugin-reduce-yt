@@ -27,6 +27,23 @@ function fmtTime(ts) {
   }
 }
 
+function relativeTime(ts) {
+  if (!ts) return "—";
+  const diff = Date.now() - ts;
+  const min = Math.floor(diff / 60000);
+  const hr = Math.floor(diff / 3600000);
+  const day = Math.floor(diff / 86400000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  if (hr < 24) return `${hr}h ago`;
+  if (day < 7) return `${day}d ago`;
+  try {
+    return new Date(ts).toLocaleDateString();
+  } catch {
+    return "—";
+  }
+}
+
 async function getAll() {
   return await chrome.storage.local.get([
     KEYS.session,
@@ -70,13 +87,13 @@ function renderCategoryBoxFromVids(vids) {
     return;
   }
 
-  const totals = { technical: 0, hobby: 0, travel: 0, entertainment: 0 };
+  const totals = { technical: 0, hobby: 0, travel: 0, finance: 0, news: 0, entertainment: 0 };
   arr.forEach((v) => {
     const cat = effectiveCategory(window.__pn_overrides, v);
     totals[cat] = (totals[cat] || 0) + (v.watchMs || 0);
   });
 
-  const order = ["technical", "hobby", "travel", "entertainment"];
+  const order = ["technical", "hobby", "travel", "finance", "news", "entertainment"];
   box.innerHTML = order
     .filter((c) => (totals[c] || 0) > 0)
     .map((c) => {
@@ -119,6 +136,7 @@ function renderVideosFromVideoArray(vids) {
     const title = document.createElement("div");
     title.className = "itemTitle";
     title.textContent = v.title || v.videoId || "Video";
+    title.title = v.title || v.videoId || "Video";
 
     const right = document.createElement("div");
     right.style.display = "flex";
@@ -141,6 +159,8 @@ function renderVideosFromVideoArray(vids) {
       { id: "technical", label: "Technical" },
       { id: "hobby", label: "Hobby" },
       { id: "travel", label: "Travel" },
+      { id: "finance", label: "Finance" },
+      { id: "news", label: "News" },
       { id: "entertainment", label: "Entertainment" }
     ].forEach((opt) => {
       const o = document.createElement("option");
@@ -233,7 +253,8 @@ function renderHistory(history) {
 
     const sub = document.createElement("div");
     sub.className = "itemSub";
-    sub.textContent = `${fmtTime(h.startTs)} • Videos: ${h.videosWatched || 0}`;
+    sub.textContent = `${relativeTime(h.startTs)} • Videos: ${h.videosWatched || 0}`;
+    sub.title = fmtTime(h.startTs);
 
     li.appendChild(top);
     li.appendChild(sub);
@@ -330,7 +351,9 @@ async function appendSessionHistorySnapshot({ session, stats }) {
     videosWatched: stats?.videosWatched || 0,
     totalActiveMs: stats?.totalActiveMs || 0,
     uniqueVideos: Object.keys(videosMap).length,
-    topVideos
+    topVideos,
+    maxTimeMs: session.maxTimeMs || 0,
+    frictionSkips: stats?.frictionSkips || 0
   });
   await chrome.storage.local.set({ [KEYS.sessionHistory]: arr.slice(-20) });
 }
@@ -399,11 +422,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   $("clearHistory").addEventListener("click", async () => {
+    if (!confirm("Clear all session history? This cannot be undone.")) return;
     await clearHistory();
     await render();
   });
 
   await render();
-  setInterval(render, 2000);
+  setInterval(() => {
+    const anyOpen = document.querySelector(".catSelect:focus");
+    if (!anyOpen) render();
+  }, 2000);
 });
 

@@ -8,10 +8,12 @@ const CAT_COLORS = {
   technical:     "#6ea8fe",
   hobby:         "#a78bfa",
   travel:        "#34d399",
+  finance:       "#fbbf24",
+  news:          "#f472b6",
   entertainment: "#fb923c"
 };
 
-const CAT_ORDER = ["technical", "hobby", "travel", "entertainment"];
+const CAT_ORDER = ["technical", "hobby", "travel", "finance", "news", "entertainment"];
 
 const GRID_COLOR  = "rgba(242,244,248,0.08)";
 const TEXT_COLOR  = "rgba(242,244,248,0.65)";
@@ -76,7 +78,7 @@ function setupCanvas(canvas) {
  *   - If color is an array, each bar gets its own color.
  *   - Per-bar colors: pass barColors:[...] as a top-level option alongside datasets
  */
-function drawBarChart(canvas, { labels, datasets, barColors }) {
+function drawBarChart(canvas, { labels, datasets, barColors, yFmt }) {
   const { ctx, w, h } = setupCanvas(canvas);
 
   const padL = 54, padR = 16, padT = 14, padB = 36;
@@ -100,7 +102,7 @@ function drawBarChart(canvas, { labels, datasets, barColors }) {
     ctx.moveTo(padL, y);
     ctx.lineTo(padL + plotW, y);
     ctx.stroke();
-    ctx.fillText(fmtMs(v), padL - 4, y + 3);
+    ctx.fillText((yFmt || fmtMs)(v), padL - 4, y + 3);
   }
 
   const n        = labels.length;
@@ -140,7 +142,7 @@ function drawBarChart(canvas, { labels, datasets, barColors }) {
 /**
  * Draws a line chart.
  */
-function drawLineChart(canvas, { labels, values, color }) {
+function drawLineChart(canvas, { labels, values, color, yFmt }) {
   const { ctx, w, h } = setupCanvas(canvas);
 
   const padL = 54, padR = 16, padT = 14, padB = 36;
@@ -162,12 +164,12 @@ function drawLineChart(canvas, { labels, values, color }) {
     ctx.moveTo(padL, y);
     ctx.lineTo(padL + plotW, y);
     ctx.stroke();
-    ctx.fillText(fmtMs(v), padL - 4, y + 3);
+    ctx.fillText((yFmt || fmtMs)(v), padL - 4, y + 3);
   }
 
   if (values.length < 2) {
     // fallback to bars for single-point
-    drawBarChart(canvas, { labels, datasets: [{ data: values, color: color || BAR_DEFAULT }] });
+    drawBarChart(canvas, { labels, datasets: [{ data: values, color: color || BAR_DEFAULT }], yFmt });
     return;
   }
 
@@ -176,7 +178,7 @@ function drawLineChart(canvas, { labels, values, color }) {
 
   // Gradient fill
   const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
-  grad.addColorStop(0, (color || BAR_DEFAULT) + "55");
+  grad.addColorStop(0, (color || BAR_DEFAULT) + "28");
   grad.addColorStop(1, (color || BAR_DEFAULT) + "00");
 
   ctx.beginPath();
@@ -254,7 +256,7 @@ function showEmpty(canvas, msg) {
  * Returns { technical, hobby, travel, entertainment } totals for one session.
  */
 function sessionCategoryTotals(session, overrides) {
-  const totals = { technical: 0, hobby: 0, travel: 0, entertainment: 0 };
+  const totals = { technical: 0, hobby: 0, travel: 0, finance: 0, news: 0, entertainment: 0 };
   const vids = Array.isArray(session.topVideos) ? session.topVideos : [];
   for (const v of vids) {
     const cat = effectiveCategory(overrides, v);
@@ -267,7 +269,7 @@ function sessionCategoryTotals(session, overrides) {
 /** Average ms per category across all sessions. */
 function computeCategoryAverages(history, overrides) {
   if (history.length === 0) return null;
-  const sums = { technical: 0, hobby: 0, travel: 0, entertainment: 0 };
+  const sums = { technical: 0, hobby: 0, travel: 0, finance: 0, news: 0, entertainment: 0 };
   for (const h of history) {
     const t = sessionCategoryTotals(h, overrides);
     for (const c of CAT_ORDER) sums[c] += t[c];
@@ -352,7 +354,215 @@ function shortLabel(key) {
   return key;
 }
 
+const WORD_STOPWORDS = new Set([
+  "the","a","an","of","to","in","on","at","is","it","i","and","or","for",
+  "with","how","why","what","my","you","your","me","this","that","was","are",
+  "be","been","by","from","as","we","he","she","they","do","did","not","no",
+  "but","so","if","its","just","get","all","new","one","two","can","will","up"
+]);
+
+/**
+ * Word frequency from video titles across all sessions.
+ * Returns [{ word, count }] sorted descending, top 40.
+ */
+function computeWordFrequency(history) {
+  const freq = {};
+  for (const h of history) {
+    const vids = Array.isArray(h.topVideos) ? h.topVideos : [];
+    for (const v of vids) {
+      const words = (v.title || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9 ]/g, " ")
+        .split(/\s+/)
+        .filter((w) => w.length > 2 && !WORD_STOPWORDS.has(w));
+      for (const w of words) freq[w] = (freq[w] || 0) + 1;
+    }
+  }
+  return Object.entries(freq)
+    .map(([word, count]) => ({ word, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 40);
+}
+
+/**
+ * Session counts bucketed by day-of-week (0=Sun) × hour (0–23).
+ * Returns number[7][24].
+ */
+function computeHeatmap(history) {
+  const grid = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  for (const h of history) {
+    if (!h.startTs) continue;
+    const d = new Date(h.startTs);
+    grid[d.getDay()][d.getHours()]++;
+  }
+  return grid;
+}
+
+/**
+ * Per-session intent adherence (%).
+ * For each session, fraction of topVideos whose title contains at least one
+ * non-trivial word from the session intent string.
+ * Returns { labels: string[], values: number[] } — values are 0–100.
+ */
+function computeIntentAdherence(history) {
+  const labels = [];
+  const values = [];
+  for (const h of history) {
+    if (!h.startTs) continue;
+    labels.push(shortLabel(isoDay(h.startTs)));
+    const vids = Array.isArray(h.topVideos) ? h.topVideos : [];
+    if (vids.length === 0 || !h.intent) { values.push(0); continue; }
+    const intentWords = (h.intent || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9 ]/g, " ")
+      .split(/\s+/)
+      .filter((w) => w.length > 2);
+    if (intentWords.length === 0) { values.push(0); continue; }
+    let matched = 0;
+    for (const v of vids) {
+      const t = (v.title || "").toLowerCase();
+      if (intentWords.some((w) => t.includes(w))) matched++;
+    }
+    values.push(Math.round((matched / vids.length) * 100));
+  }
+  return { labels, values };
+}
+
 // ── rendering ──────────────────────────────────────────────────────────────────
+
+function renderHeatmapChart(history) {
+  const canvas = $("heatmapChart");
+  if (!canvas) return;
+  if (history.length === 0) { showEmpty(canvas, "No session data yet."); return; }
+
+  const grid = computeHeatmap(history);
+  const maxCount = Math.max(...grid.flat(), 1);
+
+  const { ctx, w, h } = setupCanvas(canvas);
+
+  const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const padL = 36, padR = 8, padT = 18, padB = 20;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const cellW = plotW / 24;
+  const cellH = plotH / 7;
+
+  // Draw cells
+  for (let day = 0; day < 7; day++) {
+    for (let hour = 0; hour < 24; hour++) {
+      const count = grid[day][hour];
+      const alpha = count === 0 ? 0.06 : 0.15 + (count / maxCount) * 0.85;
+      ctx.fillStyle = `rgba(110,168,254,${alpha.toFixed(2)})`;
+      const x = padL + hour * cellW;
+      const y = padT + day * cellH;
+      ctx.fillRect(x + 1, y + 1, cellW - 2, cellH - 2);
+    }
+  }
+
+  // Row labels (day names)
+  ctx.fillStyle = TEXT_COLOR;
+  ctx.font = "10px system-ui, sans-serif";
+  ctx.textAlign = "right";
+  for (let day = 0; day < 7; day++) {
+    const y = padT + day * cellH + cellH / 2 + 3;
+    ctx.fillText(DAY_LABELS[day], padL - 4, y);
+  }
+
+  // Column labels — every 3 hours
+  ctx.textAlign = "center";
+  for (let hour = 0; hour < 24; hour += 3) {
+    let lbl;
+    if (hour === 0)  lbl = "12a";
+    else if (hour === 12) lbl = "12p";
+    else if (hour < 12)   lbl = `${hour}a`;
+    else                   lbl = `${hour - 12}p`;
+    const x = padL + hour * cellW + cellW / 2;
+    ctx.fillText(lbl, x, padT - 4);
+    ctx.fillText(lbl, x, padT + plotH + 13);
+  }
+}
+
+function renderWordCloud(history) {
+  const canvas = $("wordCloudChart");
+  if (!canvas) return;
+  if (history.length === 0) { showEmpty(canvas, "No session data yet."); return; }
+  const words = computeWordFrequency(history);
+  if (words.length === 0) { showEmpty(canvas, "No video titles recorded yet."); return; }
+
+  const { ctx, w, h } = setupCanvas(canvas);
+
+  const maxCount = words[0].count;
+  const minSize = 11, maxSize = 32;
+  const palette = Object.values(CAT_COLORS);
+
+  const pad = 12;
+  let x = pad, y = pad + maxSize;
+
+  words.forEach(({ word, count }, i) => {
+    const size = Math.round(minSize + ((count / maxCount) * (maxSize - minSize)));
+    ctx.font = `${size}px system-ui, sans-serif`;
+    const tw = ctx.measureText(word).width;
+
+    if (x + tw + pad > w) {
+      x = pad;
+      y += size + 8;
+    }
+    if (y > h) return; // clip if canvas full
+
+    ctx.fillStyle = palette[i % palette.length];
+    ctx.fillText(word, x, y);
+    x += tw + 10;
+  });
+}
+
+function renderWatchVsIntendedChart(history) {
+  const canvas = $("watchVsIntendedChart");
+  if (!canvas) return;
+  const sessions = history.filter((h) => h.maxTimeMs > 0).slice(-10);
+  if (sessions.length === 0) { showEmpty(canvas, "No sessions with a time limit set yet."); return; }
+  const labels  = sessions.map((h) => shortLabel(isoDay(h.startTs)));
+  const actual   = sessions.map((h) => h.totalActiveMs || 0);
+  const intended = sessions.map((h) => h.maxTimeMs || 0);
+  drawBarChart(canvas, {
+    labels,
+    datasets: [
+      { data: actual,   color: "#6ea8fe" },
+      { data: intended, color: "rgba(242,244,248,0.18)" }
+    ]
+  });
+}
+
+function renderSkipRateTrendChart(history) {
+  const canvas = $("skipRateTrendChart");
+  if (!canvas) return;
+  if (history.length === 0) { showEmpty(canvas, "No session data yet."); return; }
+  const labels = history.map((h) => shortLabel(isoDay(h.startTs)));
+  const values = history.map((h) => h.frictionSkips || 0);
+  if (values.every((v) => v === 0)) {
+    showEmpty(canvas, "No friction skips recorded yet.");
+    return;
+  }
+  drawLineChart(canvas, {
+    labels,
+    values,
+    color: "#f472b6",
+    yFmt: (v) => Math.round(v).toString()
+  });
+}
+
+function renderIntentAdherenceChart(history) {
+  const canvas = $("intentAdherenceChart");
+  if (!canvas) return;
+  if (history.length === 0) { showEmpty(canvas, "No session data yet."); return; }
+  const { labels, values } = computeIntentAdherence(history);
+  if (labels.length === 0) { showEmpty(canvas, "No session data yet."); return; }
+  drawLineChart(canvas, {
+    labels,
+    values,
+    color: "#6ea8fe",
+    yFmt: (v) => Math.round(v) + "%"
+  });
+}
 
 function renderKPIs(history) {
   const sessions = history.length;
@@ -457,6 +667,11 @@ async function renderAll(period) {
   renderCategoryChart(history, overrides);
   renderTimeOfDayChart(history);
   renderPeriodChart(history, period);
+  renderIntentAdherenceChart(history);
+  renderHeatmapChart(history);
+  renderWatchVsIntendedChart(history);
+  renderWordCloud(history);
+  renderSkipRateTrendChart(history);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

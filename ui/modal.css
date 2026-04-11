@@ -216,6 +216,13 @@ select.pn-input option {
   background: rgba(110, 168, 254, 0.75);
 }
 
+.pn-friction-reason-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pn-muted);
+  margin: 12px 0 6px;
+}
+
 .pn-friction-actions {
   display: flex;
   gap: 10px;

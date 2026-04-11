@@ -328,6 +328,7 @@
       delBtn.textContent = "Delete";
       delBtn.style.cssText = "padding:2px 8px;font-size:11px;color:var(--pn-danger)";
       delBtn.addEventListener("click", async () => {
+        if (!confirm("Delete this note?")) return;
         await deleteEntry({
           videoId: this._currentVideoId,
           sessionStartTs: this._session?.startTs || 0,

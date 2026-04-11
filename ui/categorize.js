@@ -57,9 +57,30 @@ function pnCategorizeTitle(title) {
     { re: /\b(chess|puzzle|rubik)\b/, w: 2 }
   ];
 
-  const techScore = pnScoreTitle(t, TECH);
-  const travelScore = pnScoreTitle(t, TRAVEL);
-  const hobbyScore = pnScoreTitle(t, HOBBY);
+  const FINANCE = [
+    { re: /\b(invest|investing|investment|investor)\b/, w: 3 },
+    { re: /\b(stock|stocks|market|trading|trader|portfolio)\b/, w: 3 },
+    { re: /\b(crypto|bitcoin|ethereum|nft|defi|blockchain)\b/, w: 3 },
+    { re: /\b(budget|budgeting|personal finance|financial|money)\b/, w: 2 },
+    { re: /\b(retire|retirement|passive income|net worth|wealth)\b/, w: 3 },
+    { re: /\b(etf|index fund|dividend|compound interest|401k|roth)\b/, w: 3 },
+    { re: /\b(debt|loan|mortgage|credit|saving|savings)\b/, w: 2 }
+  ];
+
+  const NEWS = [
+    { re: /\b(news|breaking|update|latest|today|happening)\b/, w: 2 },
+    { re: /\b(politics|political|election|government|president|congress|senate)\b/, w: 3 },
+    { re: /\b(war|conflict|crisis|protest|climate|policy)\b/, w: 2 },
+    { re: /\b(world|global|international|geopolit)\b/, w: 2 },
+    { re: /\b(economy|economic|inflation|recession|gdp)\b/, w: 2 },
+    { re: /\b(interview|press conference|debate|speech|explained)\b/, w: 1 }
+  ];
+
+  const techScore    = pnScoreTitle(t, TECH);
+  const travelScore  = pnScoreTitle(t, TRAVEL);
+  const hobbyScore   = pnScoreTitle(t, HOBBY);
+  const financeScore = pnScoreTitle(t, FINANCE);
+  const newsScore    = pnScoreTitle(t, NEWS);
 
   // Tie-breakers: some keywords overlap (e.g., "walkthrough" gaming vs tutorial).
   // If "game/gameplay" appears, bias toward hobby unless strong tech indicators exist.
@@ -67,10 +88,12 @@ function pnCategorizeTitle(title) {
   const hasCode = /\b(code|coding|program|programming|api|javascript|python|react|node|sql)\b/.test(t);
   if (hasGame && !hasCode) return "hobby";
 
-  const best = Math.max(techScore, travelScore, hobbyScore);
+  const best = Math.max(techScore, travelScore, hobbyScore, financeScore, newsScore);
   if (best <= 0) return "entertainment?";
-  if (best === techScore) return "technical";
-  if (best === travelScore) return "travel";
+  if (best === techScore)    return "technical";
+  if (best === travelScore)  return "travel";
+  if (best === financeScore) return "finance";
+  if (best === newsScore)    return "news";
   return "hobby";
 }
 
@@ -83,6 +106,10 @@ function pnFunMessage(category, fmtDuration, ms) {
       return `Wholesome. ${time} on hobbies—future you will approve.`;
     case "travel":
       return `Mentally abroad for ${time}. Passport: imaginary (for now).`;
+    case "finance":
+      return `${time} thinking about money. Now go do something with it.`;
+    case "news":
+      return `${time} staying informed. Or spiraling. Hard to tell.`;
     case "Entertainment":
     default:
       return `WTH! You spent ${time} on this!`;

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Procrastinate Not (YouTube Intent)",
+  "name": "Still Want To Watch? (SWTW)",
   "version": "0.1.0",
-  "description": "Reduce unconscious YouTube usage through intent-setting and lightweight nudges.",
+  "description": "Still Want To Watch? Sets your intent before YouTube, then nudges you to stick to it.",
   "permissions": ["storage", "tabs", "alarms", "notifications"],
   "host_permissions": ["https://www.youtube.com/*"],
   "background": {
@@ -10,7 +10,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "YouTube Intent",
+    "default_title": "SWTW",
     "default_popup": "ui/analytics.html"
   },
   "options_page": "ui/app.html",

@@ -3,50 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>YouTube Intent — Analytics</title>
+    <title>Still Want To Watch? — Analytics</title>
     <link rel="stylesheet" href="./analytics.css" />
     <style>
       body { width: auto; }
       .wrap { max-width: 980px; margin: 0 auto; }
       .itemTitle { max-width: 680px; }
-
-      .tabs {
-        display: flex;
-        gap: 4px;
-        margin-bottom: 12px;
-      }
-
-      .tab {
-        appearance: none;
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--muted);
-        padding: 7px 14px;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: 700;
-        font-size: 12px;
-        text-decoration: none;
-        display: inline-block;
-      }
-
-      .tab.active {
-        background: rgba(110, 168, 254, 0.15);
-        border-color: rgba(110, 168, 254, 0.55);
-        color: var(--text);
-      }
-
-      .tab:hover:not(.active) {
-        background: rgba(255, 255, 255, 0.08);
-        color: var(--text);
-      }
     </style>
   </head>
   <body>
     <!-- Reuse the popup analytics UI + logic, but in a full tab -->
     <main class="wrap" aria-label="YouTube session analytics (full page)">
       <header class="top">
-        <div class="title">YouTube Intent</div>
+        <div class="title">Still Want To Watch?</div>
         <div class="muted" id="status">Loading…</div>
       </header>
 

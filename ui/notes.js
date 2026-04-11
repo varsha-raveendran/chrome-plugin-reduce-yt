@@ -22,6 +22,23 @@ function fmtShortTime(ts) {
   }
 }
 
+function relativeTime(ts) {
+  if (!ts) return "—";
+  const diff = Date.now() - ts;
+  const min = Math.floor(diff / 60000);
+  const hr = Math.floor(diff / 3600000);
+  const day = Math.floor(diff / 86400000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  if (hr < 24) return `${hr}h ago`;
+  if (day < 7) return `${day}d ago`;
+  try {
+    return new Date(ts).toLocaleDateString();
+  } catch {
+    return "—";
+  }
+}
+
 async function loadNotes() {
   const res = await chrome.storage.local.get([NOTES_KEY]);
   return Array.isArray(res[NOTES_KEY]) ? res[NOTES_KEY] : [];
@@ -185,6 +202,7 @@ function buildEntryRow(note, entry) {
   });
 
   delBtn.addEventListener("click", async () => {
+    if (!confirm("Delete this note?")) return;
     await deleteEntry(note.videoId, note.sessionStartTs, entry.id);
     row.remove();
     // If all entries removed, remove the whole card.
@@ -265,7 +283,8 @@ function renderNotes(notes) {
     }
 
     const tsSpan = document.createElement("span");
-    tsSpan.textContent = fmtTime(note.ts);
+    tsSpan.textContent = relativeTime(note.ts);
+    tsSpan.title = fmtTime(note.ts);
     meta.appendChild(tsSpan);
 
     const entriesWrap = document.createElement("div");

@@ -3,47 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>YouTube Intent — Analytics</title>
+    <title>Still Want To Watch? — Analytics</title>
     <link rel="stylesheet" href="./analytics.css" />
     <link rel="stylesheet" href="./charts.css" />
     <style>
       body { width: auto; }
       .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 24px; }
-
-      .tabs {
-        display: flex;
-        gap: 4px;
-        margin-bottom: 12px;
-      }
-
-      .tab {
-        appearance: none;
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--muted);
-        padding: 7px 14px;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: 700;
-        font-size: 12px;
-        text-decoration: none;
-        display: inline-block;
-      }
-
-      .tab.active {
-        background: rgba(110, 168, 254, 0.15);
-        border-color: rgba(110, 168, 254, 0.55);
-        color: var(--text);
-      }
-
-      .tab:hover:not(.active) {
-        background: rgba(255, 255, 255, 0.08);
-        color: var(--text);
-      }
     </style>
   </head>
   <body>
-    <main class="wrap" aria-label="YouTube Intent Analytics">
+    <main class="wrap" aria-label="Still Want To Watch? Analytics">
       <header class="top">
         <div class="title">Analytics</div>
         <div class="muted" id="status">Loading…</div>
@@ -108,6 +77,51 @@
         <div class="muted small">Total active watch time per period.</div>
         <div class="chartWrap">
           <canvas id="periodChart" height="240"></canvas>
+        </div>
+      </section>
+
+      <!-- 4. Intent adherence over time -->
+      <section class="card">
+        <div class="sectionTitle">Intent adherence over time</div>
+        <div class="muted small">% of videos watched per session whose title matched your stated intent.</div>
+        <div class="chartWrap">
+          <canvas id="intentAdherenceChart" height="240"></canvas>
+        </div>
+      </section>
+
+      <!-- 5. Session start time heatmap -->
+      <section class="card">
+        <div class="sectionTitle">Session start time heatmap</div>
+        <div class="muted small">When you start YouTube sessions — day of week vs. hour of day.</div>
+        <div class="chartWrap">
+          <canvas id="heatmapChart" height="160"></canvas>
+        </div>
+      </section>
+
+      <!-- 6. Watch time vs. intended time -->
+      <section class="card">
+        <div class="sectionTitle">Watch time vs. intended time</div>
+        <div class="muted small">Actual active watch time (blue) vs. your set time limit (dim) — last 10 sessions with a limit.</div>
+        <div class="chartWrap">
+          <canvas id="watchVsIntendedChart" height="240"></canvas>
+        </div>
+      </section>
+
+      <!-- 7. Word cloud -->
+      <section class="card">
+        <div class="sectionTitle">Word cloud — video titles</div>
+        <div class="muted small">Most common words in videos you've watched. Bigger = more frequent.</div>
+        <div class="chartWrap">
+          <canvas id="wordCloudChart" height="200"></canvas>
+        </div>
+      </section>
+
+      <!-- 8. Skip rate trend -->
+      <section class="card">
+        <div class="sectionTitle">Friction skip rate</div>
+        <div class="muted small">How many times you clicked Skip per session — a rising trend means the friction is being bypassed more.</div>
+        <div class="chartWrap">
+          <canvas id="skipRateTrendChart" height="240"></canvas>
         </div>
       </section>
     </main>

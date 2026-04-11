@@ -40,6 +40,18 @@
     const bar = document.createElement("div");
     progress.appendChild(bar);
 
+    const reasonLabel = document.createElement("div");
+    reasonLabel.className = "pn-friction-reason-label";
+    reasonLabel.setAttribute("data-pn-reason-label", "1");
+    reasonLabel.textContent = "Why are you watching this?";
+
+    const reasonInput = document.createElement("input");
+    reasonInput.type = "text";
+    reasonInput.className = "pn-input";
+    reasonInput.placeholder = "e.g. research for project, relax after work";
+    reasonInput.setAttribute("data-pn-reason", "1");
+    reasonInput.autocomplete = "off";
+
     const actions = document.createElement("div");
     actions.className = "pn-friction-actions";
 
@@ -47,6 +59,8 @@
     skipBtn.className = "pn-btn primary";
     skipBtn.type = "button";
     skipBtn.textContent = "Skip";
+    skipBtn.disabled = true;
+    skipBtn.style.opacity = "0.45";
 
     const cancelBtn = document.createElement("button");
     cancelBtn.className = "pn-btn";
@@ -56,11 +70,18 @@
     actions.appendChild(cancelBtn);
     actions.appendChild(skipBtn);
 
+    const kbHint = document.createElement("div");
+    kbHint.style.cssText = "font-size:11px;color:rgba(242,244,248,0.45);text-align:right;margin-top:6px";
+    kbHint.textContent = "Esc to cancel · Enter to watch";
+
     card.appendChild(title);
     card.appendChild(sub);
     card.appendChild(match);
     card.appendChild(progress);
+    card.appendChild(reasonLabel);
+    card.appendChild(reasonInput);
     card.appendChild(actions);
+    card.appendChild(kbHint);
 
     el.appendChild(overlay);
     el.appendChild(card);
@@ -444,13 +465,26 @@
       const skipBtn = el.querySelector("button.primary");
       const cancelBtn = el.querySelector("button:not(.primary)");
 
-      if (!sub || !bar || !skipBtn || !cancelBtn) {
+      const reasonInput = el.querySelector('[data-pn-reason="1"]');
+
+      if (!sub || !bar || !skipBtn || !cancelBtn || !reasonInput) {
         location.assign(url);
         return;
       }
 
       this._open = true;
       el.setAttribute("data-open", "true");
+
+      // Reset reason input each time the overlay opens.
+      reasonInput.value = "";
+      skipBtn.disabled = true;
+      skipBtn.style.opacity = "0.45";
+      reasonInput.oninput = () => {
+        const hasText = (reasonInput.value || "").trim().length > 0;
+        skipBtn.disabled = !hasText;
+        skipBtn.style.opacity = hasText ? "1" : "0.45";
+        if (hasText) reasonInput.style.borderColor = "";
+      };
 
       const titleEl = el.querySelector(".pn-friction-title");
       if (titleEl) {
@@ -492,10 +526,22 @@
         this._raf = null;
         skipBtn.onclick = null;
         cancelBtn.onclick = null;
+        reasonInput.oninput = null;
       };
 
       const go = () => {
+        if (!(reasonInput.value || "").trim()) {
+          reasonInput.focus();
+          reasonInput.style.borderColor = "rgba(255,107,107,0.8)";
+          return;
+        }
         this._skipCount++;
+        // Persist skip count to session stats so analytics can read it.
+        window.PN_Storage.get(["pn_session_stats"]).then((data) => {
+          const s = data.pn_session_stats || {};
+          s.frictionSkips = (s.frictionSkips || 0) + 1;
+          window.PN_Storage.set({ pn_session_stats: s });
+        }).catch(() => {});
         cleanup();
         location.assign(url);
       };
@@ -503,7 +549,10 @@
       skipBtn.onclick = go;
       cancelBtn.onclick = () => cleanup();
 
-      this._timer = setTimeout(go, DURATION_MS);
+      // Auto-advance only fires if a reason has been typed.
+      this._timer = setTimeout(() => {
+        if ((reasonInput.value || "").trim()) go();
+      }, DURATION_MS);
 
       const tick = () => {
         const p = Math.min(1, (Date.now() - started) / DURATION_MS);
@@ -533,7 +582,7 @@
         prevCleanup();
       };
 
-      skipBtn.focus();
+      reasonInput.focus();
     }
   }
 

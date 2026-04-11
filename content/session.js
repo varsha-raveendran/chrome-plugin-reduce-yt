@@ -334,7 +334,9 @@
           videosWatched: this._stats?.videosWatched || 0,
           totalActiveMs: this._stats?.totalActiveMs || 0,
           uniqueVideos: Object.keys(this._stats?.videos || {}).length,
-          topVideos
+          topVideos,
+          maxTimeMs: this._session?.maxTimeMs || 0,
+          frictionSkips: this._stats?.frictionSkips || 0
         });
         // Keep last 20.
         const trimmed = arr.slice(-20);
@@ -407,6 +409,8 @@
         { value: "technical",     label: "Technical" },
         { value: "hobby",         label: "Hobby" },
         { value: "travel",        label: "Travel" },
+        { value: "finance",       label: "Finance" },
+        { value: "news",          label: "News" },
         { value: "entertainment", label: "Entertainment" },
       ].forEach(({ value, label }) => {
         const opt = document.createElement("option");
@@ -493,12 +497,39 @@
       kpi.textContent = `You’ve watched ${this._stats.videosWatched} videos in ${fmtDuration(elapsedMs)} (active: ${fmtDuration(activeMs)}).`;
       wrapper.appendChild(kpi);
 
+      const reasonLabel = document.createElement("div");
+      reasonLabel.className = "pn-field-label";
+      reasonLabel.style.marginTop = "12px";
+      reasonLabel.textContent = "Why are you continuing?";
+      wrapper.appendChild(reasonLabel);
+
+      const reasonInput = document.createElement("input");
+      reasonInput.type = "text";
+      reasonInput.className = "pn-input";
+      reasonInput.placeholder = "e.g. still on topic, one more video";
+      reasonInput.style.marginTop = "6px";
+      reasonInput.autocomplete = "off";
+      wrapper.appendChild(reasonInput);
+
       const continueBtn = window.PN_UI.button("Continue", {
         variant: "primary",
         onClick: async () => {
+          if (!(reasonInput.value || "").trim()) {
+            reasonInput.focus();
+            reasonInput.style.borderColor = "rgba(255,107,107,0.8)";
+            return;
+          }
           await this._setInterventionCooldown(trigger === "duration");
           this._closeModal();
         }
+      });
+      continueBtn.disabled = true;
+      continueBtn.style.opacity = "0.45";
+      reasonInput.addEventListener("input", () => {
+        const hasText = (reasonInput.value || "").trim().length > 0;
+        continueBtn.disabled = !hasText;
+        continueBtn.style.opacity = hasText ? "1" : "0.45";
+        if (hasText) reasonInput.style.borderColor = "";
       });
 
       const endBtn = window.PN_UI.button("End Session", {
@@ -523,7 +554,7 @@
 
       window.PN_UI.openModal(parts);
       this._cleanupFocusTrap = window.PN_UI.trapFocus(parts.modal, null);
-      setTimeout(() => continueBtn.focus(), 0);
+      setTimeout(() => reasonInput.focus(), 0);
     }
 
     async _setInterventionCooldown(durationIntervened) {
