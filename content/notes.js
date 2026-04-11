@@ -238,7 +238,27 @@
       document.documentElement.appendChild(panel);
       this._panel = panel;
 
+      // Wire drag on the button. Track whether a drag occurred so we can
+      // suppress the click handler if the user was dragging, not tapping.
+      let _wasDragged = false;
+      if (window.PN_Draggable) {
+        const origMousedown = btn.onmousedown;
+        let _dragStartX, _dragStartY;
+        btn.addEventListener("mousedown", (e) => {
+          _dragStartX = e.clientX;
+          _dragStartY = e.clientY;
+          _wasDragged = false;
+        });
+        btn.addEventListener("mousemove", (e) => {
+          if (Math.abs(e.clientX - _dragStartX) > 4 || Math.abs(e.clientY - _dragStartY) > 4) {
+            _wasDragged = true;
+          }
+        });
+        window.PN_Draggable.makeDraggable(btn, btn, "notes-btn");
+      }
+
       btn.addEventListener("click", () => {
+        if (_wasDragged) { _wasDragged = false; return; }
         if (this._open) {
           this._closePanel(true);
         } else {

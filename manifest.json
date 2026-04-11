@@ -23,6 +23,8 @@
         "content/spa.js",
         "content/ui_modal.js",
         "content/session.js",
+        "content/draggable.js",
+        "content/cat.js",
         "content/friction.js",
         "content/notes.js",
         "content/main.js"

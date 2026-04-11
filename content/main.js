@@ -11,6 +11,9 @@
 
     const notes = new window.PN_Notes.NotesController();
     await notes.init();
+
+    const cat = new window.PN_Cat.CatWidget();
+    await cat.init();
   }
 
   // document_start can run before DOM is ready; our UI roots attach to documentElement.

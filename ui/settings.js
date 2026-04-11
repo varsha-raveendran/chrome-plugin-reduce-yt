@@ -33,10 +33,16 @@
   // ── General ────────────────────────────────────────────────────────────────
 
   async function initGeneral(settings) {
-    const toggle = document.getElementById("frictionToggle");
-    toggle.checked = settings.frictionEnabled !== false;
-    toggle.addEventListener("change", async () => {
-      await save({ frictionEnabled: toggle.checked });
+    const frictionToggle = document.getElementById("frictionToggle");
+    frictionToggle.checked = settings.frictionEnabled !== false;
+    frictionToggle.addEventListener("change", async () => {
+      await save({ frictionEnabled: frictionToggle.checked });
+    });
+
+    const catToggle = document.getElementById("catWidgetToggle");
+    catToggle.checked = settings.catWidgetEnabled !== false;
+    catToggle.addEventListener("change", async () => {
+      await save({ catWidgetEnabled: catToggle.checked });
     });
   }
 

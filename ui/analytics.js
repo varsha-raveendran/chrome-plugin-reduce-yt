@@ -44,6 +44,25 @@ function relativeTime(ts) {
   }
 }
 
+const CAT_MOODS = [
+  { emoji: "😸", label: "On track" },
+  { emoji: "😾", label: "A bit over…" },
+  { emoji: "🙀", label: "Still here?!" },
+  { emoji: "😿", label: "Please stop" },
+  { emoji: "😿", label: "I'm begging you" },
+];
+
+function getCatMoodStr(elapsedMs, maxTimeMs) {
+  const over = elapsedMs - maxTimeMs;
+  let mood;
+  if (over < 0)           mood = CAT_MOODS[0];
+  else if (over < 15 * 60000) mood = CAT_MOODS[1];
+  else if (over < 30 * 60000) mood = CAT_MOODS[2];
+  else if (over < 45 * 60000) mood = CAT_MOODS[3];
+  else                    mood = CAT_MOODS[4];
+  return `${mood.emoji} ${mood.label}`;
+}
+
 async function getAll() {
   return await chrome.storage.local.get([
     KEYS.session,
@@ -312,6 +331,18 @@ async function render() {
   $("intent").textContent = active ? (session?.intent || "—") : "—";
 
   const elapsed = active && session?.startTs ? Date.now() - session.startTs : 0;
+
+  // Cat mood in popup.
+  const catEl = $("catMood");
+  if (catEl) {
+    if (active) {
+      const maxTimeMs = session?.maxTimeMs || 20 * 60000;
+      catEl.textContent = getCatMoodStr(elapsed, maxTimeMs);
+      catEl.style.display = "";
+    } else {
+      catEl.style.display = "none";
+    }
+  }
   $("elapsed").textContent = active ? fmtDuration(elapsed) : "—";
   $("active").textContent = active ? fmtDuration(stats?.totalActiveMs || 0) : "—";
   $("videosOpened").textContent = active ? String(stats?.videosWatched || 0) : "—";
