@@ -14,8 +14,17 @@ Rules:
 - Do not moralize. Never say "you should" or "you shouldn't."
 - Be genuinely curious, not performatively concerned.
 - Avoid corporate wellness language.
+- No greetings — respond as if mid-conversation.
 - After the user's SECOND reply, write a 1–2 sentence warm summary of what you heard, then end with exactly: "Okay — you've got this. Go watch." on its own line.
-- No greetings — respond as if mid-conversation.`;
+
+Question style — ask things like:
+- "What else could you be doing with this time?"
+- "Is there something you're avoiding right now?"
+- "What made you set this particular goal today?"
+- "How do you usually feel after a long YouTube session?"
+- "Is this video actually helping you with what you came here for?"
+- "What would feel better to have done an hour from now?"
+Pick the question that fits the context — don't use these verbatim, adapt them naturally.`;
 
   class CoachController {
     constructor() {
@@ -33,6 +42,7 @@ Rules:
 
     async start(context, onProceed) {
       this._onProceed = onProceed;
+      this._context = context;
       this._messages = [];
       this._userTurns = 0;
 
@@ -91,6 +101,11 @@ Rules:
       proceedBtn.addEventListener("click", () => this._close());
       this._proceedBtn = proceedBtn;
 
+      const chatMoreBtn = window.PN_UI.button("Chat more \u2192", {});
+      chatMoreBtn.style.display = "none";
+      chatMoreBtn.addEventListener("click", () => this._openFullChat());
+      this._chatMoreBtn = chatMoreBtn;
+
       const wrapper = document.createElement("div");
       wrapper.appendChild(messagesEl);
       wrapper.appendChild(inputRow);
@@ -98,7 +113,7 @@ Rules:
       const parts = window.PN_UI.createModal({
         title: "Quick check-in",
         contentNode: wrapper,
-        actions: [proceedBtn],
+        actions: [chatMoreBtn, proceedBtn],
         ariaLabel: "Life coach check-in"
       });
 
@@ -162,10 +177,9 @@ Rules:
 
       if (isDone) {
         if (this._inputRow) this._inputRow.style.display = "none";
-        if (this._proceedBtn) {
-          this._proceedBtn.style.display = "";
-          setTimeout(() => this._proceedBtn.focus(), 0);
-        }
+        if (this._proceedBtn) this._proceedBtn.style.display = "";
+        if (this._chatMoreBtn) this._chatMoreBtn.style.display = "";
+        setTimeout(() => this._proceedBtn?.focus(), 0);
       } else {
         if (this._input) {
           this._input.disabled = false;
@@ -190,6 +204,19 @@ Rules:
         return "No Gemini API key set. Add it in Settings to enable the life coach. For now, carry on \u2014 you\u2019ve reflected by writing your reason.\n\nOkay \u2014 you've got this. Go watch.";
       }
       return "Couldn\u2019t reach the coach right now. That\u2019s okay \u2014 you already wrote your reason. Carry on mindfully.\n\nOkay \u2014 you've got this. Go watch.";
+    }
+
+    async _openFullChat() {
+      // Save conversation state so the full-page chat can resume it.
+      await chrome.storage.local.set({
+        pn_coach_thread: {
+          messages: this._messages,
+          context: this._context,
+          ts: Date.now()
+        }
+      });
+      chrome.runtime.sendMessage({ type: "PN_OPEN_COACH_TAB" });
+      this._close();
     }
 
     _close() {

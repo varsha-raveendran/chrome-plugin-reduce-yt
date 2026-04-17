@@ -46,6 +46,11 @@ chrome.runtime.onStartup.addListener(async () => {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || typeof msg.type !== "string") return;
 
+  if (msg.type === "PN_OPEN_COACH_TAB") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("ui/coach.html") });
+    return;
+  }
+
   if (msg.type === "PN_SET_COACH_KEY") {
     const key = msg.payload?.key || "";
     (async () => {
