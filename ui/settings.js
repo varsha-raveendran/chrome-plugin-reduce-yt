@@ -55,9 +55,9 @@
 
     coachToggle.checked = settings.coachEnabled === true;
 
-    // Key lives in session storage — check if it's already set this session.
-    const { pn_gemini_key: existingKey } = await chrome.storage.session.get("pn_gemini_key");
-    if (existingKey) apiKeyInput.placeholder = "AIza\u2026(set this session)";
+    // Check if key is already held in the service worker this session.
+    const keyRes = await chrome.runtime.sendMessage({ type: "PN_GET_COACH_KEY" });
+    if (keyRes?.key) apiKeyInput.placeholder = "AIza\u2026(set this session)";
 
     coachToggle.addEventListener("change", async () => {
       await save({ coachEnabled: coachToggle.checked });
@@ -66,7 +66,7 @@
     apiKeySaveBtn.addEventListener("click", async () => {
       const key = (apiKeyInput.value || "").trim();
       if (!key) return;
-      await chrome.storage.session.set({ pn_gemini_key: key });
+      await chrome.runtime.sendMessage({ type: "PN_SET_COACH_KEY", payload: { key } });
       apiKeyInput.value = "";
       apiKeyInput.placeholder = "AIza\u2026(set this session)";
       flashSaved("apiKeySaved");

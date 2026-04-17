@@ -10,6 +10,9 @@ const DEFAULT_SETTINGS = {
 
 const ALARM_NAME = "pn_session_tick";
 
+// In-memory key store — cleared when service worker restarts (browser close/extension reload).
+let _geminiApiKey = "";
+
 async function getLocal(keys) {
   return await chrome.storage.local.get(keys);
 }
@@ -42,12 +45,15 @@ chrome.runtime.onStartup.addListener(async () => {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || typeof msg.type !== "string") return;
 
+  if (msg.type === "PN_SET_COACH_KEY") {
+    _geminiApiKey = msg.payload?.key || "";
+    sendResponse({ ok: true });
+    return;
+  }
+
   if (msg.type === "PN_GET_COACH_KEY") {
-    (async () => {
-      const { pn_gemini_key: key } = await chrome.storage.session.get("pn_gemini_key");
-      sendResponse({ key: key || "" });
-    })();
-    return true;
+    sendResponse({ key: _geminiApiKey });
+    return;
   }
 
   if (msg.type === "PN_COACH_CHAT") {
