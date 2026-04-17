@@ -432,3 +432,62 @@ select.pn-input option {
   opacity: 1;
 }
 
+/* Life coach chat */
+.pn-coach-messages {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 4px 0;
+}
+
+.pn-coach-msg {
+  max-width: 88%;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pn-coach-msg.coach {
+  background: rgba(110, 168, 254, 0.12);
+  border: 1px solid rgba(110, 168, 254, 0.25);
+  align-self: flex-start;
+  color: var(--pn-text);
+}
+
+.pn-coach-msg.user {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--pn-border);
+  align-self: flex-end;
+  color: var(--pn-muted);
+}
+
+.pn-coach-thinking {
+  font-size: 20px;
+  letter-spacing: 3px;
+  color: var(--pn-muted);
+  align-self: flex-start;
+  padding: 4px 8px;
+  animation: pn-blink 1.2s infinite;
+}
+
+@keyframes pn-blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.pn-coach-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pn-coach-input-row .pn-input {
+  flex: 1;
+}
+

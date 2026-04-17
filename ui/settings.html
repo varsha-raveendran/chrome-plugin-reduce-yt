@@ -169,6 +169,29 @@
         </div>
       </section>
 
+      <!-- Life Coach -->
+      <section class="card">
+        <div class="sectionTitle">Life coach</div>
+        <p class="sectionDesc">
+          When you click "Continue" in a check-in, a brief AI coaching conversation helps you
+          reflect on your intent. Requires a Gemini API key (free at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--accent)">aistudio.google.com</a>).
+        </p>
+        <div style="margin-bottom:14px">
+          <label class="toggle" aria-label="Enable life coach">
+            <input type="checkbox" id="coachToggle" />
+            <span class="toggleTrack"></span>
+            <span style="font-size:13px;font-weight:600">Enable life coach</span>
+          </label>
+          <div class="muted small" style="margin-top:4px;margin-left:46px">Shows a short coaching chat after you choose to continue watching.</div>
+        </div>
+        <div class="fieldRow">
+          <input id="geminiApiKey" type="password" placeholder="AIza\u2026" autocomplete="off" spellcheck="false" />
+          <button class="btn" id="apiKeySaveBtn">Save</button>
+        </div>
+        <div class="muted small" style="margin-top:6px">Your key is stored locally in Chrome and only sent to Gemini's API.</div>
+        <span class="savedBadge" id="apiKeySaved">Saved</span>
+      </section>
+
       <!-- Semantic Expansions -->
       <section class="card">
         <div class="row spread">

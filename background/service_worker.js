@@ -112,6 +112,44 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       sendResponse({ ok: true });
       return;
     }
+
+    if (msg.type === "PN_COACH_CHAT") {
+      const { messages, systemPrompt, apiKey } = msg.payload || {};
+      if (!apiKey) {
+        sendResponse({ ok: false, error: "no_api_key" });
+        return;
+      }
+      if (!Array.isArray(messages) || messages.length === 0) {
+        sendResponse({ ok: false, error: "no_messages" });
+        return;
+      }
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents: messages.map((m) => ({
+              role: m.role === "assistant" ? "model" : "user",
+              parts: [{ text: m.content }]
+            })),
+            generationConfig: { maxOutputTokens: 300 }
+          })
+        });
+        if (!res.ok) {
+          const detail = await res.text().catch(() => "");
+          sendResponse({ ok: false, error: "api_error", status: res.status, detail });
+          return;
+        }
+        const data = await res.json();
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        sendResponse({ ok: true, text });
+      } catch (err) {
+        sendResponse({ ok: false, error: "fetch_error", detail: String(err) });
+      }
+      return;
+    }
   })().catch(() => {
     // Avoid noisy failures; content script will degrade gracefully.
   });

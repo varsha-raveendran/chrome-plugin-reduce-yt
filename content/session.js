@@ -519,8 +519,23 @@
             reasonInput.style.borderColor = "rgba(255,107,107,0.8)";
             return;
           }
+          const continueReason = (reasonInput.value || "").trim();
           await this._setInterventionCooldown(trigger === "duration");
           this._closeModal();
+
+          const settings = await window.PN_Storage.getSettings();
+          if (settings.coachEnabled && window.PN_Coach) {
+            const coach = new window.PN_Coach.CoachController();
+            await coach.start(
+              {
+                intent: this._session?.intent || "",
+                elapsedMs: Date.now() - (this._session?.startTs || Date.now()),
+                videosWatched: this._stats?.videosWatched || 0,
+                continueReason
+              },
+              () => {}
+            );
+          }
         }
       });
       continueBtn.disabled = true;

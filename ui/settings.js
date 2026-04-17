@@ -46,6 +46,30 @@
     });
   }
 
+  // ── Life Coach ─────────────────────────────────────────────────────────────
+
+  async function initCoach(settings) {
+    const coachToggle = document.getElementById("coachToggle");
+    const apiKeyInput = document.getElementById("geminiApiKey");
+    const apiKeySaveBtn = document.getElementById("apiKeySaveBtn");
+
+    coachToggle.checked = settings.coachEnabled === true;
+    if (settings.geminiApiKey) apiKeyInput.placeholder = "AIza\u2026(saved)";
+
+    coachToggle.addEventListener("change", async () => {
+      await save({ coachEnabled: coachToggle.checked });
+    });
+
+    apiKeySaveBtn.addEventListener("click", async () => {
+      const key = (apiKeyInput.value || "").trim();
+      if (!key) return;
+      await save({ geminiApiKey: key });
+      apiKeyInput.value = "";
+      apiKeyInput.placeholder = "AIza\u2026(saved)";
+      flashSaved("apiKeySaved");
+    });
+  }
+
   // ── Semantic Expansions ────────────────────────────────────────────────────
 
   function renderExpansions(customExpansions) {
@@ -225,6 +249,7 @@
     const settings = await load();
     await Promise.all([
       initGeneral(settings),
+      initCoach(settings),
       initExpansions(settings),
       initTaxonomy(settings),
     ]);

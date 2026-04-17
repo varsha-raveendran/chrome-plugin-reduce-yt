@@ -22,6 +22,7 @@
         "content/storage.js",
         "content/spa.js",
         "content/ui_modal.js",
+        "content/coach.js",
         "content/session.js",
         "content/draggable.js",
         "content/cat.js",
