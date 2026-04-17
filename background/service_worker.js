@@ -10,8 +10,7 @@ const DEFAULT_SETTINGS = {
 
 const ALARM_NAME = "pn_session_tick";
 
-// In-memory key store — cleared when service worker restarts (browser close/extension reload).
-let _geminiApiKey = "";
+const COACH_KEY_STORAGE = "pn_gemini_key";
 
 async function getLocal(keys) {
   return await chrome.storage.local.get(keys);
@@ -39,6 +38,8 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 chrome.runtime.onStartup.addListener(async () => {
   await ensureDefaults();
+  // Clear the API key on browser startup so it doesn't persist across sessions.
+  await chrome.storage.local.remove(COACH_KEY_STORAGE);
   chrome.alarms.create(ALARM_NAME, { periodInMinutes: 1 });
 });
 
@@ -46,14 +47,24 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || typeof msg.type !== "string") return;
 
   if (msg.type === "PN_SET_COACH_KEY") {
-    _geminiApiKey = msg.payload?.key || "";
-    sendResponse({ ok: true });
-    return;
+    const key = msg.payload?.key || "";
+    (async () => {
+      if (key) {
+        await chrome.storage.local.set({ [COACH_KEY_STORAGE]: key });
+      } else {
+        await chrome.storage.local.remove(COACH_KEY_STORAGE);
+      }
+      sendResponse({ ok: true });
+    })();
+    return true;
   }
 
   if (msg.type === "PN_GET_COACH_KEY") {
-    sendResponse({ key: _geminiApiKey });
-    return;
+    (async () => {
+      const res = await chrome.storage.local.get(COACH_KEY_STORAGE);
+      sendResponse({ key: res[COACH_KEY_STORAGE] || "" });
+    })();
+    return true;
   }
 
   if (msg.type === "PN_COACH_CHAT") {
