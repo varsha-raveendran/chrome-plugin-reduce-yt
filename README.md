@@ -21,7 +21,8 @@ https://github.com/user-attachments/assets/c98cb22b-3f0e-4d14-a3e7-76956476ce60
 - **Session history:** last 20 sessions saved locally, each one clickable for a full breakdown.
 - **Video notes:** a floating notes panel on watch pages so you can jot things down while watching. All notes are searchable and filterable from the Notes tab.
 - **Cat mood widget:** a draggable cat emoji sits in the corner of every YouTube page and gets progressively more disappointed the longer you watch past your limit. 😸 happy while on track, 😾 grumpy once over, 🙀 horrified after 15 min, 😿 devastated after 30 min, and truly inconsolable after 45. Its current mood also shows in the popup. Can be toggled off in Settings.
-- **Settings:** toggle the friction overlay and cat widget, teach SWTW new synonyms for your intent keywords, or remap words to categories. Your rules layer on top of the defaults.
+- **Life coach:** when you click Continue in a check-in, a Gemini-powered coaching chat opens. It knows your intent, how long you've been watching, and your reason for continuing — then asks one reflective question to help you decide if you actually want to keep going. After two exchanges it wraps up and lets you watch. Requires a free Gemini API key (set in Settings). The key is held in session memory only and never written to disk.
+- **Settings:** toggle the friction overlay and cat widget, enable the life coach, teach SWTW new synonyms for your intent keywords, or remap words to categories. Your rules layer on top of the defaults.
 
 ## Project structure
 
@@ -35,6 +36,7 @@ content/
   spa.js                  # reliable SPA URL-change detection
   ui_modal.js             # modal and focus-trap utilities
   session.js              # SessionManager (intent, tracking, interventions)
+  coach.js                # CoachController (Gemini-powered life coach chat)
   friction.js             # FrictionController (click-intercept overlay)
   notes.js                # NotesController (floating notes panel on watch pages)
   main.js                 # entry point
@@ -80,7 +82,7 @@ When starting a session you set:
 | Burst | 5+ video navigations within 3 minutes |
 | Duration | Elapsed time ≥ session max time (checked every minute by background alarm) |
 
-The check-in modal shows your stated intent and current stats. You can continue or end the session.
+The check-in modal shows your stated intent and current stats. You can continue (which optionally launches the life coach) or end the session.
 
 ### Friction overlay
 
@@ -131,6 +133,7 @@ Titles are scored against keyword rules for Technical, Hobby, Travel, Finance, a
 | `pn_session_stats` | Current session stats (videos, watch times, nav events) |
 | `pn_session_history` | Last 20 completed sessions |
 | `pn_last_active` | Last user activity timestamp (for inactivity detection) |
-| `pn_settings` | `{ frictionEnabled, customExpansions, customTaxonomy }` |
+| `pn_settings` | `{ frictionEnabled, coachEnabled, customExpansions, customTaxonomy }` |
+| `pn_gemini_key` *(session)* | Gemini API key — session storage only, never persisted to disk |
 | `pn_category_overrides` | `{ [videoId]: category }` manual overrides |
 | `pn_notes` | Array of note objects (max 500) — videoId, title, url, sessionIntent, entries |
