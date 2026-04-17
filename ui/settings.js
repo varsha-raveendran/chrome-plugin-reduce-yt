@@ -54,7 +54,10 @@
     const apiKeySaveBtn = document.getElementById("apiKeySaveBtn");
 
     coachToggle.checked = settings.coachEnabled === true;
-    if (settings.geminiApiKey) apiKeyInput.placeholder = "AIza\u2026(saved)";
+
+    // Key lives in session storage — check if it's already set this session.
+    const { pn_gemini_key: existingKey } = await chrome.storage.session.get("pn_gemini_key");
+    if (existingKey) apiKeyInput.placeholder = "AIza\u2026(set this session)";
 
     coachToggle.addEventListener("change", async () => {
       await save({ coachEnabled: coachToggle.checked });
@@ -63,9 +66,9 @@
     apiKeySaveBtn.addEventListener("click", async () => {
       const key = (apiKeyInput.value || "").trim();
       if (!key) return;
-      await save({ geminiApiKey: key });
+      await chrome.storage.session.set({ pn_gemini_key: key });
       apiKeyInput.value = "";
-      apiKeyInput.placeholder = "AIza\u2026(saved)";
+      apiKeyInput.placeholder = "AIza\u2026(set this session)";
       flashSaved("apiKeySaved");
     });
   }

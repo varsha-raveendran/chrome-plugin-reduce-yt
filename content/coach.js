@@ -36,8 +36,8 @@ Rules:
       this._messages = [];
       this._userTurns = 0;
 
-      const settings = await window.PN_Storage.getSettings();
-      this._apiKey = settings.geminiApiKey || "";
+      const { pn_gemini_key: geminiKey } = await chrome.storage.session.get("pn_gemini_key");
+      this._apiKey = geminiKey || "";
 
       this._buildUI();
       const firstContext = this._buildContextMessage(context);
