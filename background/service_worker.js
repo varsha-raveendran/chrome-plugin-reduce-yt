@@ -42,6 +42,14 @@ chrome.runtime.onStartup.addListener(async () => {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || typeof msg.type !== "string") return;
 
+  if (msg.type === "PN_GET_COACH_KEY") {
+    (async () => {
+      const { pn_gemini_key: key } = await chrome.storage.session.get("pn_gemini_key");
+      sendResponse({ key: key || "" });
+    })();
+    return true;
+  }
+
   if (msg.type === "PN_COACH_CHAT") {
     const { messages, systemPrompt, apiKey } = msg.payload || {};
     if (!apiKey) {
