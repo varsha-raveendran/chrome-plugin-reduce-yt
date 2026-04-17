@@ -84,15 +84,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
     (async () => {
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-06-17:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            contents: messages.map((m) => ({
+            contents: messages.map((m, i) => ({
               role: m.role === "assistant" ? "model" : "user",
-              parts: [{ text: m.content }]
+              parts: [{ text: i === 0 ? `${systemPrompt}\n\n${m.content}` : m.content }]
             })),
             generationConfig: { maxOutputTokens: 300 }
           })
