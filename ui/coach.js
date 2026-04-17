@@ -1,5 +1,5 @@
 (() => {
-  const SYSTEM_PROMPT = `Life coach for a YouTube focus app. Help the user reflect on their habits. Ask one short question per turn (e.g. "What are you avoiding?" or "How will you feel in an hour?"). 1-3 sentences max. No moralizing.`;
+  const SYSTEM_PROMPT = `Life coach for a YouTube focus app. Use the 5-whys technique to help the user uncover the real reason they're still watching. Ask one short "why" question per turn, 1-2 sentences max. No moralizing.`;
 
   let messages = [];
   let apiKey = "";

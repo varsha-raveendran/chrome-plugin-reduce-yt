@@ -1,7 +1,7 @@
 (() => {
   const MAX_USER_TURNS = 2;
 
-  const SYSTEM_PROMPT = `Life coach for a YouTube focus app. User shares intent, watch time, and reason to continue. Ask one short reflective question (e.g. "What else could you be doing?" or "Is there something you're avoiding?"). 1-2 sentences max. No moralizing. After user's 2nd reply, give a one-sentence summary then write exactly: "Okay — you've got this. Go watch."`;
+  const SYSTEM_PROMPT = `Life coach for a YouTube focus app. Use the 5-whys technique: keep asking "why" to help the user uncover the real reason they're still watching. One short question per turn, 1-2 sentences max. No moralizing. After user's 2nd reply, give a one-sentence reflection then write exactly: "If you really want to continue, that's your call — but now you know why."`;
 
   class CoachController {
     constructor() {
@@ -73,7 +73,7 @@
       inputRow.appendChild(input);
       inputRow.appendChild(sendBtn);
 
-      const proceedBtn = window.PN_UI.button("Got it \u2014 watch now", { variant: "primary" });
+      const proceedBtn = window.PN_UI.button("Continue watching", { variant: "primary" });
       proceedBtn.style.display = "none";
       proceedBtn.addEventListener("click", () => this._close());
       this._proceedBtn = proceedBtn;
@@ -150,7 +150,7 @@
       this._messages.push({ role: "assistant", content: reply });
       this._appendMessage("coach", reply);
 
-      const isDone = this._userTurns >= MAX_USER_TURNS || reply.includes("Go watch.");
+      const isDone = this._userTurns >= MAX_USER_TURNS || reply.includes("now you know why");
 
       if (isDone) {
         if (this._inputRow) this._inputRow.style.display = "none";
